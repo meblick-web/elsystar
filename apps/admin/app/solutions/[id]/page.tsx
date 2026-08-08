@@ -12,6 +12,7 @@ export default async function SolutionEditor({ params, searchParams }: { params:
   const solution = await prisma.solution.findUnique({ where: { id } });
   if (!solution) notFound();
   const action = updateSolution.bind(null, id);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:6300";
 
   return <div className="admin"><aside><div className="brand">ELSY<span>STAR</span><small>ADMIN</small></div><nav><a href="/">Обзор</a><a href="/homepage">Главная</a><a href="/products">Продукция</a><a className="active" href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/documents">Документация</a><a href="/leads">Заявки</a><a href="/media">Медиа</a></nav></aside><main>
     <header><div><span>Решение</span><h1>{solution.name}</h1></div><div className="headerActions"><a className="adminButton" href="/solutions">← Список</a><form action={logout}><button type="submit">Выйти</button></form></div></header>
@@ -23,7 +24,7 @@ export default async function SolutionEditor({ params, searchParams }: { params:
       <label><span>Полное описание</span><textarea name="description" rows={8} defaultValue={solution.description ?? ""} /></label>
       <div className="formGrid two"><label><span>Изображение URL</span><input name="imageUrl" defaultValue={solution.imageUrl ?? ""} /></label><label><span>Порядок</span><input type="number" name="sortOrder" defaultValue={solution.sortOrder} /></label><label><span>SEO title</span><input name="seoTitle" defaultValue={solution.seoTitle ?? ""} /></label><label><span>SEO description</span><input name="seoDescription" defaultValue={solution.seoDescription ?? ""} /></label></div>
       <label className="checkLine"><input type="checkbox" name="featured" defaultChecked={solution.featured} /><span>Показывать на главной</span></label>
-      <div className="formActions"><button className="primary" type="submit">Сохранить</button><a className="adminButton" href={`/solutions/${solution.slug}`} target="_blank">Открыть публичную страницу ↗</a></div>
+      <div className="formActions"><button className="primary" type="submit">Сохранить</button><a className="adminButton" href={`${siteUrl}/solutions/${solution.slug}`} target="_blank" rel="noreferrer">Открыть публичную страницу ↗</a></div>
     </form></section><footer>v0.1.0-alpha.4 · Solution Editor</footer>
   </main></div>;
 }
