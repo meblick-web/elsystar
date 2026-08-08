@@ -1,8 +1,4 @@
-import {
-  AnalyticsEventType,
-  isDatabaseConfigured,
-  prisma,
-} from "@elsystar/database";
+import { AnalyticsEventType, isDatabaseConfigured, prisma } from "@elsystar/database";
 import { NextResponse } from "next/server";
 
 const eventMap = {
@@ -23,9 +19,26 @@ function detectDevice(userAgent: string) {
   return "desktop";
 }
 
+function cookieValue(cookie: string | null, name: string) {
+  return cookie?.match(new RegExp(`(?:^|; )${name}=([^;]+)`))?.[1] ?? null;
+}
+
+function classifySource(referrer: string | null, utmSource: string | null) {
+  if (utmSource) return utmSource.slice(0, 120);
+  if (!referrer) return "direct";
+  try {
+    const host = new URL(referrer).hostname.replace(/^www\./, "");
+    if (/google\./i.test(host)) return "google";
+    if (/yandex\./i.test(host)) return "yandex";
+    if (/bing\./i.test(host)) return "bing";
+    return host || "referral";
+  } catch {
+    return "referral";
+  }
+}
+
 export async function POST(request: Request) {
   let payload: Record<string, unknown>;
-
   try {
     payload = await request.json();
   } catch {
@@ -34,27 +47,25 @@ export async function POST(request: Request) {
 
   const name = payload.name as EventName | undefined;
   const path = typeof payload.path === "string" ? payload.path.slice(0, 500) : "/";
+  if (!name || !(name in eventMap)) return NextResponse.json({ error: "invalid_event" }, { status: 400 });
 
-  if (!name || !(name in eventMap)) {
-    return NextResponse.json({ error: "invalid_event" }, { status: 400 });
-  }
-
-  const visitorCookie = request.headers.get("cookie")?.match(/(?:^|; )elsystar_vid=([^;]+)/)?.[1];
+  const cookie = request.headers.get("cookie");
+  const visitorCookie = cookieValue(cookie, "elsystar_vid");
+  const sessionCookie = cookieValue(cookie, "elsystar_sid");
   const visitorId = visitorCookie ?? crypto.randomUUID();
-  const referrer = request.headers.get("referer")?.slice(0, 1000) ?? null;
+  const sessionId = sessionCookie ?? crypto.randomUUID();
+  const referrer = typeof payload.referrer === "string" ? payload.referrer.slice(0, 1000) : null;
   const userAgent = request.headers.get("user-agent") ?? "";
+  const search = typeof payload.search === "string" ? payload.search : "";
+  const query = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const utmSource = query.get("utm_source")?.slice(0, 120) ?? null;
+  const utmMedium = query.get("utm_medium")?.slice(0, 120) ?? null;
+  const utmCampaign = query.get("utm_campaign")?.slice(0, 160) ?? null;
+  const source = classifySource(referrer, utmSource);
 
   const response = NextResponse.json({ accepted: true, persisted: false }, { status: 202 });
-
-  if (!visitorCookie) {
-    response.cookies.set("elsystar_vid", visitorId, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 365,
-      path: "/",
-    });
-  }
+  if (!visitorCookie) response.cookies.set("elsystar_vid", visitorId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365, path: "/" });
+  response.cookies.set("elsystar_sid", sessionId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 30, path: "/" });
 
   if (!isDatabaseConfigured() || !prisma) return response;
 
@@ -63,19 +74,22 @@ export async function POST(request: Request) {
       data: {
         type: eventMap[name],
         visitorId,
+        sessionId,
         path,
         productId: typeof payload.productId === "string" ? payload.productId : null,
         documentId: typeof payload.documentId === "string" ? payload.documentId : null,
         referrer,
-        source: referrer ? "referral" : "direct",
+        source,
         device: detectDevice(userAgent),
         metadata: {
           label: typeof payload.label === "string" ? payload.label.slice(0, 200) : null,
           href: typeof payload.href === "string" ? payload.href.slice(0, 1000) : null,
+          utmSource,
+          utmMedium,
+          utmCampaign,
         },
       },
     });
-
     return NextResponse.json({ accepted: true, persisted: true });
   } catch (error) {
     console.error("analytics_event_write_failed", error);
