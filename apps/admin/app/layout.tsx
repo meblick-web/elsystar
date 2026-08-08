@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./styles.css";
 import "./alpha3.css";
+import "./alpha4.css";
 
 export const metadata: Metadata = { title: "ELSYSTAR Admin" };
 

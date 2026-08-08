@@ -1,23 +1,30 @@
 import { LeadForm } from "../components/lead-form";
 import { getFeaturedProducts } from "../lib/products";
+import { getHomepageContent, getPublishedProjects, getPublishedSolutions } from "../lib/content";
 
 export default async function Home() {
-  const products = await getFeaturedProducts();
+  const [products, content, solutions, projects] = await Promise.all([
+    getFeaturedProducts(),
+    getHomepageContent(),
+    getPublishedSolutions(true),
+    getPublishedProjects(true),
+  ]);
+  const platform = solutions.find((solution) => solution.type === "PLATFORM");
 
   return (
     <main>
       <header className="header shell">
         <a className="logo" href="/">ELSY<span>STAR</span></a>
-        <nav><a href="/products">Продукция</a><a href="#solutions">Решения</a><a href="#megapolis">ПО</a><a href="/support">Документация</a><a href="#company">О компании</a><a href="#contacts">Контакты</a></nav>
+        <nav><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/support">Документация</a><a href="#contacts">Контакты</a></nav>
         <div className="actions"><span>RU / EN</span><a className="button small" data-analytics="cta_click" href="#request">Получить КП</a></div>
       </header>
 
       <section className="hero shell">
         <div className="heroCopy">
-          <p className="eyebrow">ИНТЕЛЛЕКТУАЛЬНЫЕ ТРАНСПОРТНЫЕ СИСТЕМЫ</p>
-          <h1>Контроллеры и системы управления дорожным движением</h1>
-          <p className="lead">Разрабатываем оборудование и программные решения для безопасного и эффективного управления городской транспортной инфраструктурой.</p>
-          <div className="heroButtons"><a className="button" data-analytics="cta_click" href="#request">Подобрать решение</a><a className="button ghost" href="/products">Каталог продукции</a></div>
+          <p className="eyebrow">{content.heroEyebrow}</p>
+          <h1>{content.heroTitle}</h1>
+          <p className="lead">{content.heroDescription}</p>
+          <div className="heroButtons"><a className="button" data-analytics="cta_click" href={content.primaryCtaHref}>{content.primaryCtaLabel}</a><a className="button ghost" href={content.secondaryCtaHref}>{content.secondaryCtaLabel}</a></div>
         </div>
         <div className="heroVisual" aria-label="Концептуальная визуализация контроллера">
           <div className="signal"><i></i><i></i><i className="active"></i></div>
@@ -29,32 +36,33 @@ export default async function Home() {
       <section className="trust shell"><div><strong>30+</strong><span>лет инженерного опыта</span></div><div><strong>Собственное</strong><span>производство оборудования</span></div><div><strong>Комплексно</strong><span>от контроллера до АСУДТ</span></div></section>
 
       <section id="solutions" className="section shell">
-        <p className="eyebrow">НАПРАВЛЕНИЯ</p><h2>Всё необходимое для управления движением</h2>
-        <div className="threeCards">
-          <article><div className="icon">◇</div><h3>Дорожные контроллеры</h3><p>Надёжное управление светофорными объектами и периферией.</p><a href="/products">Подробнее →</a></article>
-          <article><div className="icon">⌁</div><h3>АСУДТ «Мегаполис»</h3><p>Централизованное управление, мониторинг и диспетчеризация.</p><a href="#megapolis">Подробнее →</a></article>
-          <article><div className="icon">↓</div><h3>Документация и поддержка</h3><p>Инструкции, сертификаты, ПО, прошивки и техническая помощь.</p><a href="/support">Перейти →</a></article>
-        </div>
+        <div className="sectionHead"><div><p className="eyebrow">{content.solutionsEyebrow}</p><h2>{content.solutionsTitle}</h2></div><a href="/solutions">Все решения →</a></div>
+        <div className="threeCards">{solutions.slice(0, 3).map((solution, index) => <article key={solution.id}><div className="icon">{index === 0 ? "◇" : index === 1 ? "⌁" : "↗"}</div><h3>{solution.name}</h3><p>{solution.shortDescription}</p><a href={`/solutions/${solution.slug}`}>Подробнее →</a></article>)}</div>
       </section>
 
-      <section id="megapolis" className="megapolis shell">
-        <div><p className="eyebrow">ПЛАТФОРМА</p><h2>АСУДТ «Мегаполис»</h2><p>Единая среда для контроля дорожных объектов, режимов работы и состояния городской сети. На главной странице показываем только главное — подробности раскрываются внутри решения.</p><a className="textLink" href="#request">Обсудить систему →</a></div>
+      {platform && <section id="megapolis" className="megapolis shell">
+        <div><p className="eyebrow">ПЛАТФОРМА</p><h2>{platform.name}</h2><p>{platform.shortDescription}</p><a className="textLink" href={`/solutions/${platform.slug}`}>О системе →</a></div>
         <div className="map"><span className="road r1"></span><span className="road r2"></span><span className="road r3"></span><i></i><i></i><i></i></div>
-      </section>
+      </section>}
 
       <section id="products" className="section shell">
         <div className="sectionHead"><div><p className="eyebrow">ПРОДУКЦИЯ</p><h2>Основные контроллеры</h2></div><a href="/products">Вся продукция →</a></div>
         <div className="productGrid">{products.map((product) => <article key={product.id}><div className="miniCabinet"></div><div><h3>{product.model}</h3><p>{product.shortDescription}</p><a data-analytics="product_view" data-product-id={product.id} href={`/products/${product.slug}`}>Подробнее →</a></div></article>)}</div>
       </section>
 
-      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>Документы и помощь — в одном месте</h2><p>Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.</p></div><a className="button ghost" data-analytics="cta_click" href="/support">Открыть документацию</a></section>
+      {projects.length > 0 && <section className="section shell homeProjects">
+        <div className="sectionHead"><div><p className="eyebrow">{content.projectsEyebrow}</p><h2>{content.projectsTitle}</h2></div><a href="/projects">Все проекты →</a></div>
+        <div className="homeProjectGrid">{projects.slice(0, 3).map((project) => <article key={project.id}><span>{[project.city, project.year].filter(Boolean).join(" · ") || "Проект ELSYSTAR"}</span><h3>{project.title}</h3><p>{project.summary}</p><a href={`/projects/${project.slug}`}>Подробнее →</a></article>)}</div>
+      </section>}
+
+      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>{content.supportTitle}</h2><p>{content.supportDescription}</p></div><a className="button ghost" data-analytics="cta_click" href="/support">Открыть документацию</a></section>
 
       <section id="request" className="requestSection shell">
         <div className="requestIntro"><p className="eyebrow">СВЯЗАТЬСЯ С НАМИ</p><h2>Получить коммерческое предложение</h2><p>Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.</p></div>
         <LeadForm />
       </section>
 
-      <footer id="contacts" className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="#megapolis">Мегаполис</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="#company">О компании</a><a href="#">Проекты</a><a href="#contacts">Контакты</a></div><div><b>Связаться</b><a href="tel:+79674232054">+7 (967) 423-20-54</a><a href="mailto:arkhast@mail.ru">arkhast@mail.ru</a></div></div></footer>
+      <footer id="contacts" className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="/solutions">Решения</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="/projects">Проекты</a><a href="#contacts">Контакты</a></div><div><b>Связаться</b><a href="tel:+79674232054">+7 (967) 423-20-54</a><a href="mailto:arkhast@mail.ru">arkhast@mail.ru</a></div></div></footer>
     </main>
   );
 }
