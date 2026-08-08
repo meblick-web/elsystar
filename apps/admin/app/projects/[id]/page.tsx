@@ -18,6 +18,7 @@ export default async function ProjectEditor({ params, searchParams }: { params: 
   const selectedProducts = new Set(project.products.map((item) => item.id));
   const selectedSolutions = new Set(project.solutions.map((item) => item.id));
   const action = updateProject.bind(null, id);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:6300";
 
   return <div className="admin"><aside><div className="brand">ELSY<span>STAR</span><small>ADMIN</small></div><nav><a href="/">Обзор</a><a href="/homepage">Главная</a><a href="/products">Продукция</a><a href="/solutions">Решения</a><a className="active" href="/projects">Проекты</a><a href="/documents">Документация</a><a href="/leads">Заявки</a><a href="/media">Медиа</a></nav></aside><main>
     <header><div><span>Проект</span><h1>{project.title}</h1></div><div className="headerActions"><a className="adminButton" href="/projects">← Список</a><form action={logout}><button type="submit">Выйти</button></form></div></header>
@@ -30,7 +31,7 @@ export default async function ProjectEditor({ params, searchParams }: { params: 
       <div className="formGrid two"><label><span>Обложка URL</span><input name="coverImageUrl" defaultValue={project.coverImageUrl ?? ""} /></label><label><span>Порядок</span><input type="number" name="sortOrder" defaultValue={project.sortOrder} /></label><label><span>SEO title</span><input name="seoTitle" defaultValue={project.seoTitle ?? ""} /></label><label><span>SEO description</span><input name="seoDescription" defaultValue={project.seoDescription ?? ""} /></label></div>
       <div className="relationGrid"><label><span>Продукция</span><select name="productIds" multiple size={Math.min(Math.max(products.length, 3), 8)} defaultValue={[...selectedProducts]}>{products.map((product) => <option key={product.id} value={product.id}>{product.model} · {product.name}</option>)}</select><small>Ctrl/Cmd — выбрать несколько.</small></label><label><span>Решения</span><select name="solutionIds" multiple size={Math.min(Math.max(solutions.length, 3), 8)} defaultValue={[...selectedSolutions]}>{solutions.map((solution) => <option key={solution.id} value={solution.id}>{solution.name}</option>)}</select><small>Ctrl/Cmd — выбрать несколько.</small></label></div>
       <label className="checkLine"><input type="checkbox" name="featured" defaultChecked={project.featured} /><span>Показывать на главной</span></label>
-      <div className="formActions"><button className="primary" type="submit">Сохранить</button><a className="adminButton" href={`/projects/${project.slug}`} target="_blank">Открыть публичную страницу ↗</a></div>
+      <div className="formActions"><button className="primary" type="submit">Сохранить</button><a className="adminButton" href={`${siteUrl}/projects/${project.slug}`} target="_blank" rel="noreferrer">Открыть публичную страницу ↗</a></div>
     </form></section><footer>v0.1.0-alpha.4 · Project Editor</footer>
   </main></div>;
 }
