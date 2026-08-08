@@ -17,6 +17,7 @@ function emit(name: EventName, payload: Record<string, unknown> = {}) {
     name,
     path: window.location.pathname,
     search: window.location.search,
+    referrer: document.referrer || undefined,
     ...payload,
   });
 
