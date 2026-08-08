@@ -4,6 +4,8 @@ import "./styles.css";
 import "./alpha3.css";
 import "./alpha4.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "ELSYSTAR — Интеллектуальные транспортные системы",
   description: "Дорожные контроллеры, программное обеспечение и АСУДТ ELSYSTAR.",
