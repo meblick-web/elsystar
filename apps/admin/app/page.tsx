@@ -52,15 +52,9 @@ async function getDashboardData() {
     const downloads = events.filter((event) => event.type === AnalyticsEventType.DOCUMENT_DOWNLOAD).length;
 
     const pageCounts = new Map<string, number>();
-    for (const event of pageViews) {
-      pageCounts.set(event.path, (pageCounts.get(event.path) ?? 0) + 1);
-    }
+    for (const event of pageViews) pageCounts.set(event.path, (pageCounts.get(event.path) ?? 0) + 1);
 
-    const popularPages = [...pageCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([path, count]) => [path, String(count)] as [string, string]);
-
+    const popularPages = [...pageCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, count]) => [path, String(count)] as [string, string]);
     const chart = Array.from({ length: 14 }, (_, index) => {
       const day = new Date(chartSince);
       day.setHours(0, 0, 0, 0);
@@ -72,12 +66,7 @@ async function getDashboardData() {
 
     return {
       configured: true,
-      metrics: [
-        ["Посетители", String(visitors)],
-        ["Просмотры", String(pageViews.length)],
-        ["Заявки КП", String(leads)],
-        ["Скачивания", String(downloads)],
-      ],
+      metrics: [["Посетители", String(visitors)], ["Просмотры", String(pageViews.length)], ["Заявки КП", String(leads)], ["Скачивания", String(downloads)]],
       popularPages,
       chart,
       catalog: { products, drafts, archived },
@@ -93,6 +82,7 @@ export default async function Admin() {
   const session = await requireAdmin();
   const data = await getDashboardData();
   const maxValue = Math.max(...data.chart, 1);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:6300";
 
   return (
     <div className="admin">
@@ -105,9 +95,9 @@ export default async function Admin() {
           <a href="#">Решения</a>
           <a href="#">Мегаполис</a>
           <a href="#">Проекты</a>
-          <a href="#">Документация</a>
-          <a href="#">Заявки</a>
-          <a href="#">Медиа</a>
+          <a href="/documents">Документация</a>
+          <a href="/leads">Заявки</a>
+          <a href="/media">Медиа</a>
           <a href="#">SEO</a>
           <a href="#">Пользователи</a>
           <a href="#">Журнал действий</a>
@@ -120,7 +110,7 @@ export default async function Admin() {
           <div><span>Панель управления</span><h1>Обзор</h1></div>
           <div className="headerActions">
             <span className={`dbStatus ${data.configured ? "online" : "offline"}`}>{data.configured ? "PostgreSQL подключён" : "БД не подключена"}</span>
-            <a className="adminButton" href="http://localhost:6300" target="_blank">Открыть сайт ↗</a>
+            <a className="adminButton" href={siteUrl} target="_blank" rel="noreferrer">Открыть сайт ↗</a>
             <form action={logout}><button type="submit">Выйти</button></form>
           </div>
         </header>
@@ -138,10 +128,16 @@ export default async function Admin() {
 
         <section className="grid lower">
           <article><div className="title"><h2>Каталог</h2><a href="/products">Управлять →</a></div><div className="catalog"><div><strong>{data.catalog.products}</strong><span>продуктов</span></div><div><strong>{data.catalog.drafts}</strong><span>черновиков</span></div><div><strong>{data.catalog.archived}</strong><span>архивных</span></div></div><a className="primary adminButton" href="/products#new">+ Добавить продукт</a></article>
-          <article><div className="title"><h2>Последние заявки</h2><span>{data.recentLeads.length}</span></div>{data.recentLeads.length ? <div className="list">{data.recentLeads.map((lead) => <div key={lead.id}><span><b>•</b>{lead.name}{lead.company ? ` · ${lead.company}` : ""}</span><strong>{lead.createdAt.toLocaleDateString("ru-RU")}</strong></div>)}</div> : <p className="empty">Заявки появятся здесь после подключения формы «Получить КП».</p>}</article>
+          <article><div className="title"><h2>Последние заявки</h2><a href="/leads">Все →</a></div>{data.recentLeads.length ? <div className="list">{data.recentLeads.map((lead) => <div key={lead.id}><span><b>•</b>{lead.name}{lead.company ? ` · ${lead.company}` : ""}</span><strong>{lead.createdAt.toLocaleDateString("ru-RU")}</strong></div>)}</div> : <p className="empty">Заявки появятся здесь после отправки формы «Получить КП».</p>}</article>
         </section>
 
-        <footer>v0.1.0-alpha.2 · Admin Auth, Catalog & Analytics Foundation</footer>
+        <section className="quickModules">
+          <a href="/documents"><strong>Документация</strong><span>Руководства, сертификаты, ПО и прошивки →</span></a>
+          <a href="/media"><strong>Медиатека</strong><span>Изображения и файлы продукции →</span></a>
+          <a href="/leads"><strong>Заявки</strong><span>Коммерческие запросы и обращения →</span></a>
+        </section>
+
+        <footer>v0.1.0-alpha.3 · Leads, Documentation & Media Center</footer>
       </main>
     </div>
   );
