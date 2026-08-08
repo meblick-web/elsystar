@@ -1,13 +1,17 @@
 {
   "name": "elsystar",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "npm run dev --workspace=@elsystar/web",
     "dev:admin": "npm run dev --workspace=@elsystar/admin",
     "build": "npm run build --workspace=@elsystar/web && npm run build --workspace=@elsystar/admin",
-    "typecheck": "npm run typecheck --workspace=@elsystar/web && npm run typecheck --workspace=@elsystar/admin"
+    "typecheck": "npm run typecheck --workspace=@elsystar/web && npm run typecheck --workspace=@elsystar/admin",
+    "db:generate": "npm run generate --workspace=@elsystar/database",
+    "db:push": "npm run db:push --workspace=@elsystar/database",
+    "db:migrate": "npm run db:migrate --workspace=@elsystar/database",
+    "validate": "npm run typecheck && npm run build"
   },
-  "engines": {"node": ">=22.0.0"}
+  "engines": { "node": ">=22.0.0" }
 }
