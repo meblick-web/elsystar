@@ -1,1 +1,26 @@
-{"name":"@elsystar/database","version":"0.1.0-alpha.1","private":true,"type":"module","exports":"./src/index.ts"}
+{
+  "name": "@elsystar/database",
+  "version": "0.1.0-alpha.2",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "postinstall": "prisma generate --config prisma.config.ts",
+    "generate": "prisma generate --config prisma.config.ts",
+    "db:push": "prisma db push --config prisma.config.ts",
+    "db:migrate": "prisma migrate dev --config prisma.config.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.9.1",
+    "@prisma/client": "7.9.1",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/pg": "8.20.0",
+    "dotenv": "17.4.2",
+    "prisma": "7.9.1"
+  }
+}
