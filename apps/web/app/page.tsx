@@ -1,3 +1,4 @@
+import { LeadForm } from "../components/lead-form";
 import { getFeaturedProducts } from "../lib/products";
 
 export default async function Home() {
@@ -7,8 +8,8 @@ export default async function Home() {
     <main>
       <header className="header shell">
         <a className="logo" href="/">ELSY<span>STAR</span></a>
-        <nav><a href="/products">Продукция</a><a href="#solutions">Решения</a><a href="#megapolis">ПО</a><a href="#support">Документация</a><a href="#company">О компании</a><a href="#contacts">Контакты</a></nav>
-        <div className="actions"><span>RU / EN</span><a className="button small" data-analytics="cta_click" href="#contacts">Получить КП</a></div>
+        <nav><a href="/products">Продукция</a><a href="#solutions">Решения</a><a href="#megapolis">ПО</a><a href="/support">Документация</a><a href="#company">О компании</a><a href="#contacts">Контакты</a></nav>
+        <div className="actions"><span>RU / EN</span><a className="button small" data-analytics="cta_click" href="#request">Получить КП</a></div>
       </header>
 
       <section className="hero shell">
@@ -16,7 +17,7 @@ export default async function Home() {
           <p className="eyebrow">ИНТЕЛЛЕКТУАЛЬНЫЕ ТРАНСПОРТНЫЕ СИСТЕМЫ</p>
           <h1>Контроллеры и системы управления дорожным движением</h1>
           <p className="lead">Разрабатываем оборудование и программные решения для безопасного и эффективного управления городской транспортной инфраструктурой.</p>
-          <div className="heroButtons"><a className="button" data-analytics="cta_click" href="#solutions">Подобрать решение</a><a className="button ghost" href="/products">Каталог продукции</a></div>
+          <div className="heroButtons"><a className="button" data-analytics="cta_click" href="#request">Подобрать решение</a><a className="button ghost" href="/products">Каталог продукции</a></div>
         </div>
         <div className="heroVisual" aria-label="Концептуальная визуализация контроллера">
           <div className="signal"><i></i><i></i><i className="active"></i></div>
@@ -32,12 +33,12 @@ export default async function Home() {
         <div className="threeCards">
           <article><div className="icon">◇</div><h3>Дорожные контроллеры</h3><p>Надёжное управление светофорными объектами и периферией.</p><a href="/products">Подробнее →</a></article>
           <article><div className="icon">⌁</div><h3>АСУДТ «Мегаполис»</h3><p>Централизованное управление, мониторинг и диспетчеризация.</p><a href="#megapolis">Подробнее →</a></article>
-          <article><div className="icon">↓</div><h3>Документация и поддержка</h3><p>Инструкции, сертификаты, ПО, прошивки и техническая помощь.</p><a href="#support">Перейти →</a></article>
+          <article><div className="icon">↓</div><h3>Документация и поддержка</h3><p>Инструкции, сертификаты, ПО, прошивки и техническая помощь.</p><a href="/support">Перейти →</a></article>
         </div>
       </section>
 
       <section id="megapolis" className="megapolis shell">
-        <div><p className="eyebrow">ПЛАТФОРМА</p><h2>АСУДТ «Мегаполис»</h2><p>Единая среда для контроля дорожных объектов, режимов работы и состояния городской сети. На главной странице показываем только главное — подробности раскрываются внутри решения.</p><a className="textLink" href="#">О системе →</a></div>
+        <div><p className="eyebrow">ПЛАТФОРМА</p><h2>АСУДТ «Мегаполис»</h2><p>Единая среда для контроля дорожных объектов, режимов работы и состояния городской сети. На главной странице показываем только главное — подробности раскрываются внутри решения.</p><a className="textLink" href="#request">Обсудить систему →</a></div>
         <div className="map"><span className="road r1"></span><span className="road r2"></span><span className="road r3"></span><i></i><i></i><i></i></div>
       </section>
 
@@ -46,9 +47,14 @@ export default async function Home() {
         <div className="productGrid">{products.map((product) => <article key={product.id}><div className="miniCabinet"></div><div><h3>{product.model}</h3><p>{product.shortDescription}</p><a data-analytics="product_view" data-product-id={product.id} href={`/products/${product.slug}`}>Подробнее →</a></div></article>)}</div>
       </section>
 
-      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>Документы и помощь — в одном месте</h2><p>Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.</p></div><a className="button ghost" data-analytics="cta_click" href="#">Открыть документацию</a></section>
+      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>Документы и помощь — в одном месте</h2><p>Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.</p></div><a className="button ghost" data-analytics="cta_click" href="/support">Открыть документацию</a></section>
 
-      <footer id="contacts" className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="#megapolis">Мегаполис</a><a href="#support">Документация</a></div><div><b>Компания</b><a href="#company">О компании</a><a href="#">Проекты</a><a href="#contacts">Контакты</a></div><div><b>Связаться</b><a href="tel:+79674232054">+7 (967) 423-20-54</a><a href="mailto:arkhast@mail.ru">arkhast@mail.ru</a></div></div></footer>
+      <section id="request" className="requestSection shell">
+        <div className="requestIntro"><p className="eyebrow">СВЯЗАТЬСЯ С НАМИ</p><h2>Получить коммерческое предложение</h2><p>Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.</p></div>
+        <LeadForm />
+      </section>
+
+      <footer id="contacts" className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="#megapolis">Мегаполис</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="#company">О компании</a><a href="#">Проекты</a><a href="#contacts">Контакты</a></div><div><b>Связаться</b><a href="tel:+79674232054">+7 (967) 423-20-54</a><a href="mailto:arkhast@mail.ru">arkhast@mail.ru</a></div></div></footer>
     </main>
   );
 }
