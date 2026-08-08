@@ -60,6 +60,11 @@ function normalizeProduct(product: {
   };
 }
 
+const publicDocuments = {
+  where: { isPublic: true, publishedAt: { not: null as Date | null } },
+  orderBy: { publishedAt: "desc" as const },
+};
+
 export async function getPublishedProducts() {
   if (isDatabaseConfigured() && prisma) {
     try {
@@ -68,7 +73,7 @@ export async function getPublishedProducts() {
         orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
         include: {
           specifications: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
-          documents: { where: { publishedAt: { not: null } }, orderBy: { publishedAt: "desc" } },
+          documents: publicDocuments,
         },
       });
       if (products.length) return products.map(normalizeProduct);
@@ -86,7 +91,7 @@ export async function getFeaturedProducts() {
         where: { status: ProductStatus.PUBLISHED, featured: true },
         take: 2,
         orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
-        include: { specifications: true, documents: true },
+        include: { specifications: true, documents: publicDocuments },
       });
       if (products.length) return products.map(normalizeProduct);
     } catch (error) {
@@ -103,7 +108,7 @@ export async function getProductBySlug(slug: string) {
         where: { slug, status: ProductStatus.PUBLISHED },
         include: {
           specifications: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
-          documents: { where: { publishedAt: { not: null } }, orderBy: { publishedAt: "desc" } },
+          documents: publicDocuments,
         },
       });
       if (product) return normalizeProduct(product);
