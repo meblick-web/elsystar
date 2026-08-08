@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AnalyticsTracker } from "../components/analytics-tracker";
 import "./styles.css";
+import "./alpha3.css";
 
 export const metadata: Metadata = {
   title: "ELSYSTAR — Интеллектуальные транспортные системы",
