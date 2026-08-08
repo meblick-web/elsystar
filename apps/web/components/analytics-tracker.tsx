@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 type EventName =
@@ -16,6 +16,8 @@ function emit(name: EventName, payload: Record<string, unknown> = {}) {
   const body = JSON.stringify({
     name,
     path: window.location.pathname,
+    search: window.location.search,
+    referrer: document.referrer || undefined,
     ...payload,
   });
 
@@ -34,10 +36,12 @@ function emit(name: EventName, payload: Record<string, unknown> = {}) {
 
 export function AnalyticsTracker() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
 
   useEffect(() => {
     emit("page_view");
-  }, [pathname]);
+  }, [pathname, search]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
