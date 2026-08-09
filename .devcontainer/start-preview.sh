@@ -127,6 +127,23 @@ start_service() {
   echo "[ELSYSTAR] ${name} is ready on ${public_port} (Next ${next_pid}, proxy ${proxy_pid})."
 }
 
+configure_codespaces_visibility() {
+  if [ -z "${CODESPACE_NAME:-}" ]; then return 0; fi
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "[ELSYSTAR] GitHub CLI is unavailable; port visibility was not changed automatically." >&2
+    return 0
+  fi
+
+  echo "[ELSYSTAR] Configuring Codespaces sharing: public site=PUBLIC, admin=PRIVATE..."
+  if gh codespace ports visibility 6300:public 6301:private -c "$CODESPACE_NAME" >/dev/null 2>&1; then
+    echo "[ELSYSTAR] Public preview is shareable without GitHub sign-in. Admin remains private."
+  else
+    echo "[ELSYSTAR] Could not change Codespaces port visibility automatically." >&2
+    echo "[ELSYSTAR] In the PORTS panel set 6300 -> Public and keep 6301 -> Private." >&2
+    echo "[ELSYSTAR] An organization Codespaces policy may restrict public ports." >&2
+  fi
+}
+
 echo "[ELSYSTAR] Restarting preview on the current repository revision..."
 stop_service "web" 6300 16300
 stop_service "admin" 6301 16301
@@ -141,6 +158,7 @@ run_step "Synchronizing beta2 SEO defaults and redirects" 120 .codespaces/logs/s
 
 start_service "web" 6300 16300 "apps/web" "$SITE_HOST"
 start_service "admin" 6301 16301 "apps/admin" "$ADMIN_HOST"
+configure_codespaces_visibility
 
 echo "[ELSYSTAR] Preview is ready."
 echo "[ELSYSTAR] Public site: ${SITE_URL}"
