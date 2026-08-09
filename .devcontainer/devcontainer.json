@@ -9,12 +9,12 @@
     "6300": {
       "label": "ELSYSTAR Public Site",
       "protocol": "http",
-      "onAutoForward": "silent"
+      "onAutoForward": "notify"
     },
     "6301": {
       "label": "ELSYSTAR Admin",
       "protocol": "http",
-      "onAutoForward": "silent"
+      "onAutoForward": "notify"
     }
   },
   "hostRequirements": {
