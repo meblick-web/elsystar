@@ -56,6 +56,12 @@ enum MediaType {
   FILE
 }
 
+enum CorporateMediaSection {
+  ABOUT
+  PRODUCTION
+  CONTACTS
+}
+
 enum LeadStatus {
   NEW
   IN_PROGRESS
@@ -102,6 +108,77 @@ model HomepageContent {
   supportTitle       String   @default("Документы и помощь — в одном месте")
   supportDescription String   @default("Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.")
   updatedAt          DateTime @updatedAt
+}
+
+model CorporateContent {
+  id                  String                     @id @default("corporate")
+  companyName         String                     @default("ООО «Элсистар»")
+  aboutEyebrow        String                     @default("О КОМПАНИИ")
+  aboutTitle          String                     @default("Инженерные решения для управления дорожным движением")
+  aboutLead           String                     @default("ООО «Элсистар» — производитель программируемых контроллеров и сервисного оборудования управления дорожным движением.")
+  aboutBody           String?
+  historyTitle        String                     @default("Опыт разработки и внедрения")
+  historyBody         String?
+  productionEyebrow   String                     @default("ПРОИЗВОДСТВО")
+  productionTitle     String                     @default("Собственное производство оборудования")
+  productionLead      String                     @default("Компания располагает собственными производственными мощностями для выпуска дорожных контроллеров и оборудования АСУДД.")
+  productionBody      String?
+  competenciesTitle   String                     @default("Ключевые компетенции")
+  supportTitle        String                     @default("Техническая поддержка")
+  supportBody         String?
+  phonePrimary        String?                    @default("+7 (967) 423-20-54")
+  phoneSecondary      String?                    @default("8 (86635) 41034")
+  emailPrimary        String?                    @default("arkhast@mail.ru")
+  address             String?
+  workingHours        String?
+  legalName           String?                    @default("ООО «Элсистар»")
+  inn                 String?
+  kpp                 String?
+  ogrn                 String?
+  competencies        CorporateCompetency[]
+  mediaPlacements     CorporateMediaPlacement[]
+  updatedAt           DateTime                   @updatedAt
+}
+
+model CorporateCompetency {
+  id          String           @id @default(cuid())
+  contentId   String           @default("corporate")
+  title       String
+  description String?
+  sortOrder   Int              @default(0)
+  content     CorporateContent @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([contentId, sortOrder])
+}
+
+model CorporateMediaPlacement {
+  id           String                @id @default(cuid())
+  contentId    String                @default("corporate")
+  mediaAssetId String
+  section      CorporateMediaSection
+  caption      String?
+  sortOrder    Int                   @default(0)
+  content      CorporateContent      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  mediaAsset   MediaAsset            @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  createdAt    DateTime              @default(now())
+
+  @@unique([contentId, mediaAssetId, section])
+  @@index([contentId, section, sortOrder])
+  @@index([mediaAssetId])
+}
+
+model FaqEntry {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
 }
 
 model ProductCategory {
@@ -307,23 +384,24 @@ model Document {
 }
 
 model MediaAsset {
-  id              String    @id @default(cuid())
-  title           String
-  alt             String?
-  type            MediaType @default(IMAGE)
-  url             String
-  storageProvider String    @default("external")
-  storageKey      String?
-  mimeType        String?
-  fileSize        Int?
-  width           Int?
-  height          Int?
-  productId       String?
-  product         Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
-  isPrimary       Boolean   @default(false)
-  sortOrder       Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                    String                     @id @default(cuid())
+  title                 String
+  alt                   String?
+  type                  MediaType                  @default(IMAGE)
+  url                   String
+  storageProvider       String                     @default("external")
+  storageKey            String?
+  mimeType              String?
+  fileSize              Int?
+  width                 Int?
+  height                Int?
+  productId             String?
+  product               Product?                   @relation(fields: [productId], references: [id], onDelete: SetNull)
+  isPrimary             Boolean                    @default(false)
+  sortOrder             Int                        @default(0)
+  corporatePlacements   CorporateMediaPlacement[]
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
 
   @@index([type, createdAt])
   @@index([productId, isPrimary, sortOrder])
