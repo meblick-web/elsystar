@@ -1,0 +1,1 @@
+Codespaces Port Cleanup: public preview ports 6300/6301; internal Next.js ports 16300/16301 ignored by auto-forwarding; proxy headers normalized consistently.
