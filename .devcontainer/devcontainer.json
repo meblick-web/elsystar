@@ -1,0 +1,35 @@
+{
+  "name": "ELSYSTAR Cloud Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [6300, 6301],
+  "portsAttributes": {
+    "6300": {
+      "label": "ELSYSTAR Public Site",
+      "protocol": "http",
+      "onAutoForward": "silent"
+    },
+    "6301": {
+      "label": "ELSYSTAR Admin",
+      "protocol": "http",
+      "onAutoForward": "silent"
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "16gb"
+  },
+  "postCreateCommand": "bash .devcontainer/bootstrap.sh",
+  "postStartCommand": "bash .devcontainer/start-preview.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Prisma.prisma",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

@@ -1,6 +1,5 @@
 name: CI
 
-# alpha4 validation trigger
 on:
   push:
     branches: [main]
@@ -19,3 +18,8 @@ jobs:
       - run: npm run db:generate
       - run: npm run typecheck
       - run: npm run build
+      - name: Validate Codespaces configuration
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml config >/dev/null
+          bash -n .devcontainer/bootstrap.sh
+          bash -n .devcontainer/start-preview.sh

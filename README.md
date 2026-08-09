@@ -23,7 +23,24 @@
 - аналитика: посетители, сессии, просмотры, источники, устройства, товары, скачивания, заявки и конверсия;
 - пользователи админки и роли `ADMIN / EDITOR / SUPPORT / ANALYST`;
 - журнал административных действий;
-- SEO и управляемые 301/302 redirects.
+- SEO и управляемые 301/302 redirects;
+- готовая GitHub Codespaces-среда: Node.js 22 + PostgreSQL 16 + автоматический запуск web/admin.
+
+## GitHub Codespaces
+
+Репозиторий содержит `.devcontainer/devcontainer.json` и полностью готов для облачной разработки без локального ПК.
+
+При создании Codespace автоматически:
+
+1. поднимается PostgreSQL 16;
+2. выполняется `npm install`;
+3. генерируется Prisma Client;
+4. применяется development-схема БД;
+5. запускается публичный сайт на `6300`;
+6. запускается админка на `6301`;
+7. оба порта автоматически пробрасываются GitHub Codespaces.
+
+Подробности: `docs/CODESPACES.md`.
 
 ## Структура
 
@@ -32,6 +49,7 @@
 - `packages/database` — Prisma/PostgreSQL
 - `packages/analytics` — контракты событий аналитики
 - `packages/shared` — общие типы
+- `.devcontainer` — GitHub Codespaces environment
 - `docs` — архитектура и release notes
 
 ## Локальный запуск
@@ -70,6 +88,8 @@ npm run db:generate
 npm run typecheck
 npm run build
 ```
+
+CI дополнительно проверяет Docker Compose и shell-скрипты Codespaces.
 
 ## Принципы
 
