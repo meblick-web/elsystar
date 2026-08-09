@@ -1,5 +1,4 @@
 import { isAdminAuthConfigured } from "../../lib/auth";
-import { login } from "./actions";
 
 export default async function LoginPage({
   searchParams,
@@ -25,7 +24,7 @@ export default async function LoginPage({
 
         {params.error && <div className="loginError">Неверный email или пароль.</div>}
 
-        <form action={login} className="loginForm">
+        <form action="/api/auth/login" method="post" className="loginForm">
           <label>
             <span>Email</span>
             <input name="email" type="email" autoComplete="username" required disabled={!configured} />
