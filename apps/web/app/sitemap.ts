@@ -53,12 +53,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         select: { slug: true, updatedAt: true },
       }),
       prisma.documentSeries.findMany({
-        where: {
-          versions: { some: { isCurrent: true, isPublic: true, publishedAt: { not: null } } },
-        },
+        where: { versions: { some: { isCurrent: true, isPublic: true, publishedAt: { not: null } } } },
         select: { slug: true, updatedAt: true },
       }),
     ]);
+
+    if (projects.length === 0) {
+      const projectsIndex = entries.findIndex((entry) => entry.url === absoluteSiteUrl("/projects"));
+      if (projectsIndex >= 0) entries.splice(projectsIndex, 1);
+    }
 
     for (const product of products) {
       const path = `/products/${product.slug}`;
