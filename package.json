@@ -1,6 +1,6 @@
 {
   "name": "elsystar",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.0-beta.2",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
@@ -14,7 +14,9 @@
     "db:backup": "bash scripts/backup-postgres.sh",
     "db:restore": "bash scripts/restore-postgres.sh",
     "security:check": "node scripts/security-preflight.mjs",
-    "validate": "npm run security:check && npm run typecheck && npm run build"
+    "seo:bootstrap": "node packages/database/scripts/bootstrap-seo-beta2.mjs",
+    "seo:check": "node scripts/seo-preflight.mjs && node scripts/check-internal-links.mjs",
+    "validate": "npm run security:check && npm run seo:check && npm run typecheck && npm run build"
   },
   "engines": { "node": ">=22.0.0" }
 }
