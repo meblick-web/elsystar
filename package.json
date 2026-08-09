@@ -1,6 +1,6 @@
 {
   "name": "elsystar",
-  "version": "0.2.0-beta.2.1",
+  "version": "0.2.0-beta.3",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
@@ -11,12 +11,15 @@
     "db:generate": "npm run generate --workspace=@elsystar/database",
     "db:push": "npm run db:push --workspace=@elsystar/database",
     "db:migrate": "npm run db:migrate --workspace=@elsystar/database",
+    "db:init:production": "node scripts/production-db-init.mjs",
     "db:backup": "bash scripts/backup-postgres.sh",
     "db:restore": "bash scripts/restore-postgres.sh",
     "security:check": "node scripts/security-preflight.mjs",
     "seo:bootstrap": "node packages/database/scripts/bootstrap-seo-beta2.mjs",
     "seo:check": "node scripts/seo-preflight.mjs && node scripts/check-internal-links.mjs",
-    "validate": "npm run security:check && npm run seo:check && npm run typecheck && npm run build"
+    "release:check": "node scripts/release-preflight.mjs",
+    "smoke:production": "bash scripts/smoke-production.sh",
+    "validate": "npm run security:check && npm run seo:check && npm run release:check && npm run typecheck && npm run build"
   },
   "engines": { "node": ">=22.0.0" }
 }

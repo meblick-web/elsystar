@@ -1,11 +1,11 @@
 {
   "name": "@elsystar/admin",
-  "version": "0.2.0-beta.2",
+  "version": "0.2.0-beta.3",
   "private": true,
   "scripts": {
     "dev": "next dev -p 6301",
     "build": "next build",
-    "start": "next start -p 6301",
+    "start": "next start -p ${PORT:-6301}",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

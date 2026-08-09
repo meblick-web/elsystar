@@ -1,0 +1,1 @@
+.skipLink{position:fixed;left:16px;top:12px;z-index:10000;padding:10px 14px;border-radius:10px;background:#0b2430;color:#fff;font-weight:700;text-decoration:none;transform:translateY(-180%);transition:transform .16s ease}.skipLink:focus{transform:translateY(0);outline:3px solid rgba(46,141,108,.35);outline-offset:3px}.appContent:focus{outline:none}

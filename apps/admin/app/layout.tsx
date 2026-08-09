@@ -9,6 +9,7 @@ import "./alpha8.css";
 import "./alpha9.css";
 import "./alpha9-states.css";
 import "./alpha9_3.css";
+import "./beta3.css";
 
 export const metadata: Metadata = {
   title: "ELSYSTAR Admin",
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="ru"><body>{children}</body></html>;
+  return <html lang="ru"><body><a className="skipLink" href="#admin-content">Перейти к содержимому</a><div id="admin-content" className="appContent" tabIndex={-1}>{children}</div></body></html>;
 }
