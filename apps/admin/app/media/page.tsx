@@ -1,11 +1,11 @@
-import { MediaType, prisma } from "@elsystar/database";
-import { requireAdmin } from "../../lib/auth";
+import { AdminRole, MediaType, prisma } from "@elsystar/database";
+import { requireRole } from "../../lib/auth";
 import { createMediaAsset, deleteMediaAsset } from "./actions";
 
 const typeLabels: Record<MediaType, string> = { IMAGE: "Изображение", VIDEO: "Видео", FILE: "Файл" };
 
 export default async function MediaPage() {
-  await requireAdmin();
+  await requireRole(AdminRole.ADMIN, AdminRole.EDITOR);
   const [assets, products] = prisma ? await Promise.all([
     prisma.mediaAsset.findMany({ orderBy: [{ createdAt: "desc" }], include: { product: { select: { model: true } } } }),
     prisma.product.findMany({ orderBy: { model: "asc" }, select: { id: true, model: true } }),
@@ -19,20 +19,21 @@ export default async function MediaPage() {
       </aside>
       <main>
         <header><div><span>Изображения и файлы</span><h1>Медиатека</h1></div><a className="adminButton" href="/">← Обзор</a></header>
-        <div className="noticeBox">Хранилище пока provider-neutral: сюда добавляются URL и метаданные. Физическую загрузку файлов подключим после выбора хостинга/storage, не меняя структуру контента.</div>
+        <div className="noticeBox">Хранилище provider-neutral: сейчас сохраняются URL и проверенные метаданные. Разрешены только HTTP/HTTPS URL и ограниченный набор MIME. Физическую загрузку подключим после выбора production storage.</div>
 
         <section className="panel formPanel">
           <div className="title"><h2>Добавить медиа</h2><span>URL / storage key</span></div>
           <form action={createMediaAsset} className="adminForm">
             <div className="adminFormGrid">
-              <label>Название<input name="title" required /></label>
+              <label>Название<input name="title" required maxLength={200} /></label>
               <label>Тип<select name="type" defaultValue={MediaType.IMAGE}>{Object.values(MediaType).map((type) => <option key={type} value={type}>{typeLabels[type]}</option>)}</select></label>
-              <label>URL<input name="url" type="url" required placeholder="https://..." /></label>
-              <label>ALT-текст<input name="alt" placeholder="Описание изображения" /></label>
+              <label>URL<input name="url" type="url" required maxLength={2048} placeholder="https://..." /></label>
+              <label>ALT-текст<input name="alt" maxLength={300} placeholder="Описание изображения" /></label>
               <label>Продукт<select name="productId" defaultValue=""><option value="">Без привязки</option>{products.map((product) => <option key={product.id} value={product.id}>{product.model}</option>)}</select></label>
-              <label>Storage provider<input name="storageProvider" defaultValue="external" /></label>
-              <label>Storage key<input name="storageKey" placeholder="optional/path/file.jpg" /></label>
-              <label>MIME<input name="mimeType" placeholder="image/jpeg" /></label>
+              <label>Storage provider<input name="storageProvider" maxLength={50} defaultValue="external" /></label>
+              <label>Storage key<input name="storageKey" maxLength={500} placeholder="optional/path/file.jpg" /></label>
+              <label>MIME<input name="mimeType" maxLength={120} placeholder="image/jpeg" /></label>
+              <label>Размер, байт<input name="fileSize" type="number" min="1" max={250 * 1024 * 1024} /></label>
               <label>Порядок<input name="sortOrder" type="number" defaultValue="0" /></label>
             </div>
             <button className="primary" type="submit" disabled={!prisma}>Добавить</button>
