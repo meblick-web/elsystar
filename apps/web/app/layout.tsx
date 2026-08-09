@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { isDatabaseConfigured, prisma } from "@elsystar/database";
+import { Suspense } from "react";
 import { AnalyticsTracker } from "../components/analytics-tracker";
 import { resolveSeoMetadata } from "../lib/seo";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, siteOrigin } from "../lib/site";
@@ -61,7 +62,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
-        <AnalyticsTracker />
+        <Suspense fallback={null}><AnalyticsTracker /></Suspense>
         {children}
       </body>
     </html>
