@@ -1,0 +1,11 @@
+/* v0.1.0-alpha.9.3 — CMS Content & Visual QA */
+.cmsSection>.subtitle{margin:-4px 0 14px;color:#6b7880;font-size:13px;line-height:1.45}
+.productTable td .roleChip{display:inline-flex;white-space:nowrap}
+.productTable td>span:not(.status):not(.roleChip){color:#66757c;font-size:12px}
+.caseEditorGrid textarea{min-height:150px}
+.adminForm .cmsSection{scroll-margin-top:90px}
+
+@media(max-width:900px){
+  .productTable{min-width:820px}
+  .cmsSection .formGrid.two{grid-template-columns:1fr}
+}
