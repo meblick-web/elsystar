@@ -1,9 +1,9 @@
 "use server";
 
-import { ContentStatus, prisma, SolutionType } from "@elsystar/database";
+import { AdminRole, ContentStatus, prisma, SolutionType } from "@elsystar/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "../../lib/auth";
+import { requireRole } from "../../lib/auth";
 
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9а-яё-]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 120);
@@ -19,8 +19,12 @@ function type(value: FormDataEntryValue | null) {
   return value === SolutionType.PLATFORM ? SolutionType.PLATFORM : SolutionType.SOLUTION;
 }
 
+async function editorSession() {
+  return requireRole(AdminRole.ADMIN, AdminRole.EDITOR);
+}
+
 export async function createSolution(formData: FormData) {
-  const session = await requireAdmin();
+  const session = await editorSession();
   if (!prisma) redirect("/solutions?error=db#new");
   const name = String(formData.get("name") ?? "").trim();
   const shortDescription = String(formData.get("shortDescription") ?? "").trim();
@@ -39,7 +43,7 @@ export async function createSolution(formData: FormData) {
 }
 
 export async function updateSolution(id: string, formData: FormData) {
-  const session = await requireAdmin();
+  const session = await editorSession();
   if (!prisma) redirect(`/solutions/${id}?error=db`);
   const name = String(formData.get("name") ?? "").trim();
   const shortDescription = String(formData.get("shortDescription") ?? "").trim();
