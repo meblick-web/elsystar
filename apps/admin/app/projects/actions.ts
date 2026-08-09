@@ -1,9 +1,9 @@
 "use server";
 
-import { ContentStatus, prisma } from "@elsystar/database";
+import { AdminRole, ContentStatus, prisma } from "@elsystar/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "../../lib/auth";
+import { requireRole } from "../../lib/auth";
 
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9а-яё-]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 120);
@@ -16,9 +16,12 @@ function status(value: FormDataEntryValue | null) {
 function optional(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim() || null;
 }
+async function editorSession() {
+  return requireRole(AdminRole.ADMIN, AdminRole.EDITOR);
+}
 
 export async function createProject(formData: FormData) {
-  const session = await requireAdmin();
+  const session = await editorSession();
   if (!prisma) redirect("/projects?error=db#new");
   const title = String(formData.get("title") ?? "").trim();
   const summary = String(formData.get("summary") ?? "").trim();
@@ -40,7 +43,7 @@ export async function createProject(formData: FormData) {
 }
 
 export async function updateProject(id: string, formData: FormData) {
-  const session = await requireAdmin();
+  const session = await editorSession();
   if (!prisma) redirect(`/projects/${id}?error=db`);
   const title = String(formData.get("title") ?? "").trim();
   const summary = String(formData.get("summary") ?? "").trim();
