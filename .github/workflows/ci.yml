@@ -18,13 +18,18 @@ jobs:
       - run: npm run security:check
       - run: npm run seo:check
       - run: npm run db:generate
+      - run: npm run release:check
       - run: npm run typecheck
       - run: npm run build
-      - name: Validate security and operations scripts
+      - run: npm run smoke:production
+      - name: Validate security, release and operations scripts
         run: |
           node --check scripts/security-preflight.mjs
           node --check scripts/seo-preflight.mjs
           node --check scripts/check-internal-links.mjs
+          node --check scripts/release-preflight.mjs
+          node --check scripts/production-db-init.mjs
+          bash -n scripts/smoke-production.sh
           bash -n scripts/backup-postgres.sh
           bash -n scripts/restore-postgres.sh
       - name: Validate Codespaces and migration scripts
