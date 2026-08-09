@@ -1,6 +1,6 @@
 {
   "name": "@elsystar/admin",
-  "version": "0.1.0-alpha.7.2",
+  "version": "0.1.0-alpha.7.3",
   "private": true,
   "scripts": {
     "dev": "next dev -p 6301",
