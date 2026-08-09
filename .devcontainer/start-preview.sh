@@ -122,7 +122,7 @@ stop_service "admin" 6301
 rm -rf apps/web/.next apps/admin/.next
 
 run_step "Generating Prisma client" 180 .codespaces/logs/prisma-generate.log npm run db:generate
-run_step "Synchronizing development database schema" 180 .codespaces/logs/db-push.log npm run db:push
+run_step "Synchronizing development database schema" 180 .codespaces/logs/db-push.log node packages/database/scripts/codespaces-safe-push.mjs
 
 start_service "web" 6300 "@elsystar/web"
 start_service "admin" 6301 "@elsystar/admin"
