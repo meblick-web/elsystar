@@ -136,6 +136,7 @@ rm -rf apps/web/.next apps/admin/.next
 
 run_step "Generating Prisma client" 180 .codespaces/logs/prisma-generate.log npm run db:generate
 run_step "Synchronizing development database schema" 180 .codespaces/logs/db-push.log node packages/database/scripts/codespaces-safe-push.mjs
+run_step "Importing visible content into CMS" 120 .codespaces/logs/content-bootstrap.log node packages/database/scripts/bootstrap-visible-content.mjs
 
 start_service "web" 6300 16300 "apps/web" "$SITE_HOST"
 start_service "admin" 6301 16301 "apps/admin" "$ADMIN_HOST"
