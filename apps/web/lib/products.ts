@@ -101,7 +101,7 @@ export async function getPublishedCategories(): Promise<PublicProductCategory[]>
   if (isDatabaseConfigured() && prisma) {
     try {
       const categories = await prisma.productCategory.findMany({ where: { products: { some: { status: ProductStatus.PUBLISHED } } }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }], include: { parent: { select: { id: true, slug: true, name: true } } } });
-      if (categories.length) return categories.map((category) => ({ id: category.id, slug: category.slug, name: category.name, description: category.description, parent: category.parent }));
+      return categories.map((category) => ({ id: category.id, slug: category.slug, name: category.name, description: category.description, parent: category.parent }));
     } catch (error) { console.error("public_categories_query_failed", error); }
   }
   return [{ id: "fallback-controllers", slug: "road-controllers", name: "Дорожные контроллеры", description: "Контроллеры для управления светофорными объектами.", parent: null }];
@@ -111,7 +111,7 @@ export async function getPublishedProducts(categorySlug?: string) {
   if (isDatabaseConfigured() && prisma) {
     try {
       const products = await prisma.product.findMany({ where: { status: ProductStatus.PUBLISHED, ...(categorySlug ? { category: { slug: categorySlug } } : {}) }, orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }], include: productInclude });
-      if (products.length || categorySlug) return products.map(normalizeProduct);
+      return products.map(normalizeProduct);
     } catch (error) { console.error("public_products_query_failed", error); }
   }
   return categorySlug && categorySlug !== "road-controllers" ? [] : fallbackProducts;
@@ -121,7 +121,7 @@ export async function getFeaturedProducts() {
   if (isDatabaseConfigured() && prisma) {
     try {
       const products = await prisma.product.findMany({ where: { status: ProductStatus.PUBLISHED, featured: true }, take: 3, orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }], include: productInclude });
-      if (products.length) return products.map(normalizeProduct);
+      return products.map(normalizeProduct);
     } catch (error) { console.error("featured_products_query_failed", error); }
   }
   return fallbackProducts.slice(0, 2);
@@ -131,7 +131,7 @@ export async function getProductBySlug(slug: string) {
   if (isDatabaseConfigured() && prisma) {
     try {
       const product = await prisma.product.findFirst({ where: { slug, status: ProductStatus.PUBLISHED }, include: productInclude });
-      if (product) return normalizeProduct(product);
+      return product ? normalizeProduct(product) : null;
     } catch (error) { console.error("public_product_query_failed", error); }
   }
   return fallbackProducts.find((product) => product.slug === slug) ?? null;
