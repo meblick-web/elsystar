@@ -25,4 +25,5 @@ jobs:
           bash -n .devcontainer/start-preview.sh
           node --check packages/database/scripts/codespaces-safe-push.mjs
           node --check packages/database/scripts/bootstrap-visible-content.mjs
+          node --check packages/database/scripts/bootstrap-content-qa-alpha9-3.mjs
           node --check .devcontainer/codespaces-next-proxy.mjs

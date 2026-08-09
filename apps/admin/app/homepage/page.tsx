@@ -11,12 +11,24 @@ const fallback = {
   primaryCtaHref: "/solutions",
   secondaryCtaLabel: "Каталог продукции",
   secondaryCtaHref: "/products",
+  trust1Value: "30+",
+  trust1Label: "лет инженерного опыта",
+  trust2Value: "Собственное",
+  trust2Label: "производство оборудования",
+  trust3Value: "Комплексно",
+  trust3Label: "от контроллера до АСУДТ",
+  productsEyebrow: "ПРОДУКЦИЯ",
+  productsTitle: "Основные контроллеры",
   solutionsEyebrow: "НАПРАВЛЕНИЯ",
   solutionsTitle: "Всё необходимое для управления движением",
   projectsEyebrow: "ПРОЕКТЫ",
   projectsTitle: "Решения, работающие на реальных объектах",
+  supportEyebrow: "ПОДДЕРЖКА",
   supportTitle: "Документы и помощь — в одном месте",
   supportDescription: "Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.",
+  requestEyebrow: "СВЯЗАТЬСЯ С НАМИ",
+  requestTitle: "Получить коммерческое предложение",
+  requestDescription: "Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.",
 };
 
 export default async function HomepageEditor({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
@@ -30,7 +42,7 @@ export default async function HomepageEditor({ searchParams }: { searchParams: P
     <div className="admin">
       <aside>
         <div className="brand">ELSY<span>STAR</span><small>ADMIN</small></div>
-        <nav><a href="/">Обзор</a><a className="active" href="/homepage">Главная</a><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/documents">Документация</a><a href="/leads">Заявки</a><a href="/media">Медиа</a></nav>
+        <nav><a href="/">Обзор</a><a className="active" href="/homepage">Главная</a><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/documents">Документация</a><a href="/leads">Заявки</a><a href="/media">Медиа</a><a href="/corporate">Компания</a></nav>
       </aside>
       <main>
         <header><div><span>Контент</span><h1>Главная страница</h1></div><div className="headerActions"><a className="adminButton" href="/">← Обзор</a><form action={logout}><button type="submit">Выйти</button></form></div></header>
@@ -47,18 +59,38 @@ export default async function HomepageEditor({ searchParams }: { searchParams: P
               <div className="formGrid two"><label><span>Основная кнопка</span><input name="primaryCtaLabel" defaultValue={value.primaryCtaLabel} disabled={!configured} /></label><label><span>Ссылка</span><input name="primaryCtaHref" defaultValue={value.primaryCtaHref} disabled={!configured} /></label><label><span>Вторая кнопка</span><input name="secondaryCtaLabel" defaultValue={value.secondaryCtaLabel} disabled={!configured} /></label><label><span>Ссылка</span><input name="secondaryCtaHref" defaultValue={value.secondaryCtaHref} disabled={!configured} /></label></div>
             </div>
 
-            <div className="cmsSection"><div><span className="cmsIndex">02</span><h2>Решения и проекты</h2></div>
-              <div className="formGrid two"><label><span>Надзаголовок решений</span><input name="solutionsEyebrow" defaultValue={value.solutionsEyebrow} disabled={!configured} /></label><label><span>Заголовок решений</span><input name="solutionsTitle" defaultValue={value.solutionsTitle} disabled={!configured} /></label><label><span>Надзаголовок проектов</span><input name="projectsEyebrow" defaultValue={value.projectsEyebrow} disabled={!configured} /></label><label><span>Заголовок проектов</span><input name="projectsTitle" defaultValue={value.projectsTitle} disabled={!configured} /></label></div>
+            <div className="cmsSection"><div><span className="cmsIndex">02</span><h2>Преимущества под первым экраном</h2></div>
+              <div className="formGrid two">
+                <label><span>Показатель 1</span><input name="trust1Value" defaultValue={value.trust1Value} disabled={!configured} /></label><label><span>Подпись 1</span><input name="trust1Label" defaultValue={value.trust1Label} disabled={!configured} /></label>
+                <label><span>Показатель 2</span><input name="trust2Value" defaultValue={value.trust2Value} disabled={!configured} /></label><label><span>Подпись 2</span><input name="trust2Label" defaultValue={value.trust2Label} disabled={!configured} /></label>
+                <label><span>Показатель 3</span><input name="trust3Value" defaultValue={value.trust3Value} disabled={!configured} /></label><label><span>Подпись 3</span><input name="trust3Label" defaultValue={value.trust3Label} disabled={!configured} /></label>
+              </div>
             </div>
 
-            <div className="cmsSection"><div><span className="cmsIndex">03</span><h2>Поддержка</h2></div>
+            <div className="cmsSection"><div><span className="cmsIndex">03</span><h2>Продукция, решения и проекты</h2></div>
+              <div className="formGrid two">
+                <label><span>Надзаголовок продукции</span><input name="productsEyebrow" defaultValue={value.productsEyebrow} disabled={!configured} /></label><label><span>Заголовок продукции</span><input name="productsTitle" defaultValue={value.productsTitle} disabled={!configured} /></label>
+                <label><span>Надзаголовок решений</span><input name="solutionsEyebrow" defaultValue={value.solutionsEyebrow} disabled={!configured} /></label><label><span>Заголовок решений</span><input name="solutionsTitle" defaultValue={value.solutionsTitle} disabled={!configured} /></label>
+                <label><span>Надзаголовок проектов</span><input name="projectsEyebrow" defaultValue={value.projectsEyebrow} disabled={!configured} /></label><label><span>Заголовок проектов</span><input name="projectsTitle" defaultValue={value.projectsTitle} disabled={!configured} /></label>
+              </div>
+            </div>
+
+            <div className="cmsSection"><div><span className="cmsIndex">04</span><h2>Поддержка</h2></div>
+              <label><span>Надзаголовок</span><input name="supportEyebrow" defaultValue={value.supportEyebrow} disabled={!configured} /></label>
               <label><span>Заголовок</span><input name="supportTitle" defaultValue={value.supportTitle} disabled={!configured} /></label>
               <label><span>Описание</span><textarea name="supportDescription" rows={3} defaultValue={value.supportDescription} disabled={!configured} /></label>
             </div>
+
+            <div className="cmsSection"><div><span className="cmsIndex">05</span><h2>Коммерческий запрос</h2></div>
+              <label><span>Надзаголовок</span><input name="requestEyebrow" defaultValue={value.requestEyebrow} disabled={!configured} /></label>
+              <label><span>Заголовок</span><input name="requestTitle" defaultValue={value.requestTitle} disabled={!configured} /></label>
+              <label><span>Описание</span><textarea name="requestDescription" rows={3} defaultValue={value.requestDescription} disabled={!configured} /></label>
+            </div>
+
             <div className="formActions"><button className="primary" type="submit" disabled={!configured}>Сохранить главную</button></div>
           </form>
         </section>
-        <footer>v0.1.0-alpha.4 · Homepage CMS</footer>
+        <footer>v0.1.0-alpha.9.3 · Homepage CMS</footer>
       </main>
     </div>
   );

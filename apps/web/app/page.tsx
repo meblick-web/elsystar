@@ -34,10 +34,10 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="trust shell"><div><strong>30+</strong><span>лет инженерного опыта</span></div><div><strong>Собственное</strong><span>производство оборудования</span></div><div><strong>Комплексно</strong><span>от контроллера до АСУДТ</span></div></section>
+      <section className="trust shell"><div><strong>{content.trust1Value}</strong><span>{content.trust1Label}</span></div><div><strong>{content.trust2Value}</strong><span>{content.trust2Label}</span></div><div><strong>{content.trust3Value}</strong><span>{content.trust3Label}</span></div></section>
 
       <section id="products" className="section shell">
-        <div className="sectionHead"><div><p className="eyebrow">ПРОДУКЦИЯ</p><h2>Основные контроллеры</h2></div><a href="/products">Вся продукция →</a></div>
+        <div className="sectionHead"><div><p className="eyebrow">{content.productsEyebrow}</p><h2>{content.productsTitle}</h2></div><a href="/products">Вся продукция →</a></div>
         <div className="productGrid">{products.map((product) => <article key={product.id}>{product.mediaAssets[0] ? <img src={product.mediaAssets[0].url} alt={product.mediaAssets[0].alt ?? product.name} /> : <div className="miniCabinet"></div>}<div><h3>{product.model}</h3><p>{product.shortDescription}</p><a data-analytics="product_view" data-product-id={product.id} href={`/products/${product.slug}`}>Подробнее →</a></div></article>)}</div>
       </section>
 
@@ -53,15 +53,15 @@ export default async function Home() {
 
       {projects.length > 0 && <section className="section shell homeProjects">
         <div className="sectionHead"><div><p className="eyebrow">{content.projectsEyebrow}</p><h2>{content.projectsTitle}</h2></div><a href="/projects">Все проекты →</a></div>
-        <div className="homeProjectGrid">{projects.slice(0, 3).map((project) => <article key={project.id}>{project.coverImageUrl && <img src={project.coverImageUrl} alt={project.city ? `Транспортная инфраструктура — ${project.city}` : project.title} />}<div className="projectCardBody">{project.isDemo && <span className="demoBadge">Демо-кейс</span>}<span>{[project.city, project.year].filter(Boolean).join(" · ") || "Проект ELSYSTAR"}</span><h3>{project.title}</h3><p>{project.summary}</p>{project.metrics && <div className="projectMetrics">{project.metrics.map((metric)=><div key={metric.label}><strong>{metric.value}</strong><span>{metric.label}</span></div>)}</div>}<a href={`/projects/${project.slug}`}>Подробнее →</a></div></article>)}</div>
+        <div className="homeProjectGrid">{projects.slice(0, 3).map((project) => <article key={project.id}>{project.coverImageUrl && <img src={project.coverImageUrl} alt={project.city ? `Транспортная инфраструктура — ${project.city}` : project.title} />}<div className="projectCardBody">{project.isDemo && <span className="demoBadge">Демо-кейс</span>}<span>{[project.city, project.year].filter(Boolean).join(" · ") || "Проект ELSYSTAR"}</span><h3>{project.title}</h3><p>{project.summary}</p>{project.metrics.length > 0 && <div className="projectMetrics">{project.metrics.map((metric)=><div key={`${metric.value}-${metric.label}`}><strong>{metric.value}</strong><span>{metric.label}</span></div>)}</div>}<a href={`/projects/${project.slug}`}>Подробнее →</a></div></article>)}</div>
       </section>}
 
       <section className="companyTeaser shell"><div><p className="eyebrow">{corporate.aboutEyebrow}</p><h2>{corporate.aboutTitle}</h2><p>{corporate.aboutLead}</p></div><div className="companyTeaserActions"><a className="textLink" href="/about">О компании →</a><a className="textLink" href="/production">Производство →</a></div></section>
 
-      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>{content.supportTitle}</h2><p>{content.supportDescription}</p></div><div className="heroButtons"><a className="button ghost" data-analytics="cta_click" href="/support">Документация</a><a className="button ghost" href="/faq">FAQ</a></div></section>
+      <section id="support" className="support shell"><div><p className="eyebrow">{content.supportEyebrow}</p><h2>{content.supportTitle}</h2><p>{content.supportDescription}</p></div><div className="heroButtons"><a className="button ghost" data-analytics="cta_click" href="/support">Документация</a><a className="button ghost" href="/faq">FAQ</a></div></section>
 
       <section id="request" className="requestSection shell">
-        <div className="requestIntro"><p className="eyebrow">СВЯЗАТЬСЯ С НАМИ</p><h2>Получить коммерческое предложение</h2><p>Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.</p></div>
+        <div className="requestIntro"><p className="eyebrow">{content.requestEyebrow}</p><h2>{content.requestTitle}</h2><p>{content.requestDescription}</p></div>
         <LeadForm />
       </section>
 

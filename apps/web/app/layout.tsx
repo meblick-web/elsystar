@@ -11,6 +11,7 @@ import "./alpha9.css";
 import "./alpha9-states.css";
 import "./alpha9_1.css";
 import "./alpha9_1_components.css";
+import "./alpha9_3.css";
 
 export const dynamic = "force-dynamic";
 

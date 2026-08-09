@@ -1,0 +1,53 @@
+/* v0.1.0-alpha.9.3 — Content & Visual QA */
+
+/* Keep content dense without sacrificing readability. */
+.sectionHead h2{max-width:760px}
+.sectionHead a,.textLink{white-space:nowrap}
+.catalogCard>div:last-child,.productGrid article>div:last-child,.projectDenseCardBody,.visualCardBody{min-width:0}
+.catalogCard p,.projectDenseCard p,.homeProjectGrid p,.solutionVisualCard p{overflow-wrap:anywhere}
+
+/* Neutral technical media fallbacks: design chrome, never editorial content. */
+.projectMediaFallback,.projectCardMediaFallback,.solutionVisualCard:not(:has(>img))::before{
+  background-color:#e9f0ed;
+  background-image:
+    linear-gradient(120deg,rgba(9,49,55,.12),rgba(255,255,255,.1)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='540' height='280' viewBox='0 0 540 280'%3E%3Cg fill='none' stroke='%23237a5d' stroke-opacity='.28'%3E%3Cpath d='M-20 72h580M-20 208h580M135-20v320M402-20v320'/%3E%3Cpath d='M20 260L280 0M260 280L540 0' stroke-dasharray='9 10'/%3E%3Ccircle cx='135' cy='72' r='7' fill='%23237a5d'/%3E%3Ccircle cx='402' cy='208' r='7' fill='%23237a5d'/%3E%3Cpath d='M96 72h78M135 33v78M363 208h78M402 169v78' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:cover,cover;
+  background-position:center;
+}
+.projectCardMediaFallback{height:145px}
+.projectFeaturedMedia.projectMediaFallback{min-height:330px}
+.solutionVisualCard:not(:has(>img))::before{content:"";display:block;height:150px;border-bottom:1px solid rgba(35,122,93,.1)}
+
+/* QA for CMS-driven project cards. */
+.projectMetrics:empty{display:none}
+.projectDenseCardBody>p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:58px}
+.homeProjectGrid .projectCardBody>p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.demoDisclosure{display:flex;gap:14px;align-items:flex-start;margin-top:12px;margin-bottom:16px;padding:14px 18px;border:1px solid #cfe0d9;border-radius:14px;background:rgba(240,248,245,.94);font-size:13px;line-height:1.45}
+.demoDisclosure strong{flex:0 0 auto;color:#176248}
+.demoDisclosure span{color:#607078}
+
+/* Better empty states after CMS becomes the source of truth. */
+.emptyCatalog{margin-top:18px;margin-bottom:30px;padding:30px;border:1px dashed #cbdad4;border-radius:18px;background:rgba(255,255,255,.82)}
+.emptyCatalog h2{margin:0 0 8px;font-size:24px}.emptyCatalog p{max-width:700px;margin:0 0 16px;color:#687780}
+
+/* Images should remain controlled and never distort cards. */
+.solutionVisualCard>img,.projectDenseCard>img,.homeProjectGrid article>img,.corporateGallery img{display:block}
+.solutionVisualCard>img{aspect-ratio:16/8;object-fit:cover}
+.projectDenseCard>img{aspect-ratio:16/8.2;object-fit:cover}
+.catalogMedia img{max-width:100%;max-height:100%;object-fit:contain}
+
+/* Dense CMS-driven homepage. */
+.trust{gap:0}.trust div{min-width:0}.trust span{line-height:1.35}
+.requestIntro p{max-width:670px}
+
+@media(max-width:900px){
+  .sectionHead{align-items:flex-end;gap:14px}
+  .demoDisclosure{margin-top:8px}
+}
+@media(max-width:680px){
+  .sectionHead{align-items:flex-start}.sectionHead a{white-space:normal}
+  .demoDisclosure{display:block}.demoDisclosure strong{display:block;margin-bottom:5px}
+  .projectCardMediaFallback{height:165px}
+  .projectDenseCardBody>p{min-height:auto}
+}
