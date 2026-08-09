@@ -1,29 +1,24 @@
 import { AdminRole, isDatabaseConfigured, prisma } from "@elsystar/database";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { verifyPassword } from "./password";
+import {
+  adminCookieIsSecure,
+  adminCookieName,
+  createAdminSessionToken,
+  LEGACY_ADMIN_COOKIE,
+  SECURE_ADMIN_COOKIE,
+  SESSION_TTL_SECONDS,
+  SignedAdminSession,
+  verifyAdminSessionToken,
+} from "./session-token";
 
-const COOKIE_NAME = "elsystar_admin_session";
-const SESSION_TTL_SECONDS = 60 * 60 * 12;
-
-export interface AdminSession {
-  email: string;
-  role: AdminRole;
-  userId?: string;
-  exp: number;
-}
+export type AdminSession = SignedAdminSession;
 
 export function isAdminAuthConfigured() {
-  return Boolean(process.env.ADMIN_SESSION_SECRET && (process.env.ADMIN_EMAIL || isDatabaseConfigured()));
-}
-
-function sessionSecret() {
-  return process.env.ADMIN_SESSION_SECRET ?? "development-only-change-me";
-}
-
-function sign(value: string) {
-  return createHmac("sha256", sessionSecret()).update(value).digest("base64url");
+  const secret = process.env.ADMIN_SESSION_SECRET?.trim() ?? "";
+  return Boolean(secret.length >= 32 && (process.env.ADMIN_EMAIL || isDatabaseConfigured()));
 }
 
 function safeEqual(left: string, right: string) {
@@ -32,26 +27,19 @@ function safeEqual(left: string, right: string) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function createToken(session: AdminSession) {
-  const payload = Buffer.from(JSON.stringify(session)).toString("base64url");
-  return `${payload}.${sign(payload)}`;
-}
-
-function verifyToken(token: string): AdminSession | null {
-  const [payload, signature] = token.split(".");
-  if (!payload || !signature || !safeEqual(sign(payload), signature)) return null;
-
+async function auditFailedLogin(email: string) {
+  if (!isDatabaseConfigured() || !prisma) return;
   try {
-    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AdminSession;
-    if (!session.email || !session.role || !session.exp || session.exp < Math.floor(Date.now() / 1000)) return null;
-    return session;
-  } catch {
-    return null;
+    await prisma.auditLog.create({
+      data: { actorEmail: email || "unknown", action: "auth.login_failed", entityType: "AdminAuth" },
+    });
+  } catch (error) {
+    console.error("admin_failed_login_audit_failed", error);
   }
 }
 
 export async function authenticateAdmin(email: string, password: string): Promise<AdminSession | null> {
-  const normalized = email.trim().toLowerCase();
+  const normalized = email.trim().toLowerCase().slice(0, 320);
 
   if (isDatabaseConfigured() && prisma) {
     try {
@@ -66,36 +54,71 @@ export async function authenticateAdmin(email: string, password: string): Promis
     }
   }
 
-  if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD &&
-      safeEqual(normalized, process.env.ADMIN_EMAIL.trim().toLowerCase()) &&
-      safeEqual(password, process.env.ADMIN_PASSWORD)) {
+  if (
+    process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD &&
+    safeEqual(normalized, process.env.ADMIN_EMAIL.trim().toLowerCase()) &&
+    safeEqual(password, process.env.ADMIN_PASSWORD)
+  ) {
+    if (isDatabaseConfigured() && prisma) {
+      try {
+        await prisma.auditLog.create({ data: { actorEmail: normalized, action: "auth.bootstrap_login", entityType: "AdminAuth" } });
+      } catch (error) {
+        console.error("bootstrap_login_audit_failed", error);
+      }
+    }
     return { email: normalized, role: AdminRole.ADMIN, exp: 0 };
   }
 
+  await auditFailedLogin(normalized);
   return null;
 }
 
 export async function createAdminSession(identity: Omit<AdminSession, "exp"> | AdminSession) {
   const store = await cookies();
   const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
-  store.set(COOKIE_NAME, createToken({ ...identity, exp }), {
+  const name = adminCookieName();
+
+  store.set(name, createAdminSessionToken({ ...identity, exp }), {
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
+    secure: adminCookieIsSecure(),
     path: "/",
     maxAge: SESSION_TTL_SECONDS,
+    priority: "high",
   });
+
+  if (name !== LEGACY_ADMIN_COOKIE) store.delete(LEGACY_ADMIN_COOKIE);
 }
 
 export async function clearAdminSession() {
   const store = await cookies();
-  store.delete(COOKIE_NAME);
+  store.delete(LEGACY_ADMIN_COOKIE);
+  store.delete(SECURE_ADMIN_COOKIE);
 }
 
-export async function getAdminSession() {
+export async function getAdminSession(): Promise<AdminSession | null> {
   const store = await cookies();
-  const token = store.get(COOKIE_NAME)?.value;
-  return token ? verifyToken(token) : null;
+  const token = store.get(SECURE_ADMIN_COOKIE)?.value ?? store.get(LEGACY_ADMIN_COOKIE)?.value;
+  const session = token ? verifyAdminSessionToken(token) : null;
+  if (!session) return null;
+
+  // DB-backed sessions are revocable immediately. A disabled account or role change
+  // is reflected on the next request instead of waiting for the cookie TTL.
+  if (session.userId && isDatabaseConfigured() && prisma) {
+    try {
+      const user = await prisma.adminUser.findUnique({
+        where: { id: session.userId },
+        select: { active: true, email: true, role: true },
+      });
+      if (!user?.active || user.email.toLowerCase() !== session.email.toLowerCase()) return null;
+      return { ...session, role: user.role };
+    } catch (error) {
+      console.error("admin_session_revalidation_failed", error);
+      return null;
+    }
+  }
+
+  return session;
 }
 
 export async function requireAdmin() {
