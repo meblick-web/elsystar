@@ -76,8 +76,13 @@ export async function getCorporateContent() {
       });
       if (content) {
         return {
+          ...fallbackCorporate,
           ...content,
-          competencies: content.competencies.map((item) => ({ id: item.id, title: item.title, description: item.description })),
+          aboutBody: content.aboutBody ?? fallbackCorporate.aboutBody,
+          historyBody: content.historyBody ?? fallbackCorporate.historyBody,
+          productionBody: content.productionBody ?? fallbackCorporate.productionBody,
+          supportBody: content.supportBody ?? fallbackCorporate.supportBody,
+          competencies: content.competencies.length ? content.competencies.map((item) => ({ id: item.id, title: item.title, description: item.description })) : fallbackCorporate.competencies,
           media: content.mediaPlacements.map((item) => ({ id: item.id, section: String(item.section), caption: item.caption, url: item.mediaAsset.url, title: item.mediaAsset.title, alt: item.mediaAsset.alt })),
         };
       }
