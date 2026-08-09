@@ -76,13 +76,8 @@ export async function getCorporateContent() {
       });
       if (content) {
         return {
-          ...fallbackCorporate,
           ...content,
-          aboutBody: content.aboutBody ?? fallbackCorporate.aboutBody,
-          historyBody: content.historyBody ?? fallbackCorporate.historyBody,
-          productionBody: content.productionBody ?? fallbackCorporate.productionBody,
-          supportBody: content.supportBody ?? fallbackCorporate.supportBody,
-          competencies: content.competencies.length ? content.competencies.map((item) => ({ id: item.id, title: item.title, description: item.description })) : fallbackCorporate.competencies,
+          competencies: content.competencies.map((item) => ({ id: item.id, title: item.title, description: item.description })),
           media: content.mediaPlacements.map((item) => ({ id: item.id, section: String(item.section), caption: item.caption, url: item.mediaAsset.url, title: item.mediaAsset.title, alt: item.mediaAsset.alt })),
         };
       }
@@ -102,7 +97,7 @@ export async function getFaqEntries(): Promise<PublicFaqEntry[]> {
   if (isDatabaseConfigured() && prisma) {
     try {
       const entries = await prisma.faqEntry.findMany({ where: { active: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
-      if (entries.length) return entries.map((entry) => ({ id: entry.id, question: entry.question, answer: entry.answer }));
+      return entries.map((entry) => ({ id: entry.id, question: entry.question, answer: entry.answer }));
     } catch (error) {
       console.error("faq_query_failed", error);
     }
