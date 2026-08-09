@@ -67,7 +67,7 @@ const fallbackProducts: PublicProduct[] = [
   },
 ];
 
-const publicDocuments = { where: { isPublic: true, publishedAt: { not: null as Date | null } }, orderBy: { publishedAt: "desc" as const } };
+const publicDocuments = { where: { isPublic: true, publishedAt: { not: null as Date | null }, OR: [{ seriesId: null }, { isCurrent: true }] }, orderBy: { publishedAt: "desc" as const } };
 
 const productInclude = {
   category: { include: { parent: { select: { name: true } } } },
