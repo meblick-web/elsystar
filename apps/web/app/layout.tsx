@@ -8,6 +8,7 @@ import "./alpha6.css";
 import "./alpha7.css";
 import "./alpha8.css";
 import "./alpha9.css";
+import "./alpha9-states.css";
 
 export const dynamic = "force-dynamic";
 
