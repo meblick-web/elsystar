@@ -28,10 +28,9 @@ export default async function Home() {
           <p className="lead">{content.heroDescription}</p>
           <div className="heroButtons"><a className="button" data-analytics="cta_click" href={content.primaryCtaHref}>{content.primaryCtaLabel}</a><a className="button ghost" href={content.secondaryCtaHref}>{content.secondaryCtaLabel}</a></div>
         </div>
-        <div className="heroVisual" aria-label="Концептуальная визуализация контроллера">
+        <div className="heroVisual" aria-hidden="true">
           <div className="signal"><i></i><i></i><i className="active"></i></div>
           <div className="cabinet"><div className="cabinetLogo">ELSYSTAR</div><div className="vents"></div><div className="handle"></div><small>УК-4.1М</small></div>
-          <div className="dashboard"><b>Мегаполис</b><span>Состояние сети</span><strong>● Нормально</strong><div className="chart"></div></div>
         </div>
       </section>
 
