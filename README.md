@@ -4,7 +4,7 @@
 
 ## Текущий baseline
 
-`v0.1.0-alpha.7 — Documentation & Software Center`
+`v0.1.0-alpha.7.1 — Codespaces Server Actions & Restart Hotfix`
 
 ### Реализовано
 
@@ -30,7 +30,9 @@
 - пользователи админки и роли `ADMIN / EDITOR / SUPPORT / ANALYST`;
 - журнал административных действий;
 - SEO и управляемые 301/302 redirects;
-- готовая GitHub Codespaces-среда: Node.js 22 + PostgreSQL 16 + автоматический запуск web/admin и синхронизация Prisma-схемы.
+- GitHub Codespaces-среда: Node.js 22 + PostgreSQL 16 + автоматический запуск web/admin и синхронизация Prisma-схемы;
+- Codespaces reverse-proxy origin разрешён для Next.js Server Actions;
+- preview после `git pull` запускается с чистым `.next` и полным перезапуском процессов.
 
 ## GitHub Codespaces
 
@@ -40,11 +42,15 @@
 
 1. поднимается PostgreSQL 16;
 2. при первом создании выполняется `npm install`;
-3. генерируется Prisma Client;
-4. синхронизируется development-схема БД;
-5. запускается публичный сайт на `6300`;
-6. запускается админка на `6301`;
-7. оба порта автоматически пробрасываются GitHub Codespaces.
+3. старые preview-процессы останавливаются;
+4. очищается revision-dependent `.next` state;
+5. генерируется Prisma Client;
+6. синхронизируется development-схема БД;
+7. запускается публичный сайт на `6300`;
+8. запускается админка на `6301`;
+9. оба порта автоматически пробрасываются GitHub Codespaces.
+
+Prisma-команды показывают прогресс непосредственно в терминале и имеют защитный timeout.
 
 Подробности: `docs/CODESPACES.md`.
 

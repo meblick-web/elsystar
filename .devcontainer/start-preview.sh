@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 cd /workspace
 mkdir -p .codespaces/logs .codespaces/pids
@@ -13,15 +13,63 @@ else
   ADMIN_URL="http://localhost:6301"
 fi
 
-echo "[ELSYSTAR] Syncing Prisma client and development schema..."
-if ! npm run db:generate >.codespaces/logs/prisma-generate.log 2>&1; then
-  tail -n 100 .codespaces/logs/prisma-generate.log >&2 || true
-  exit 1
-fi
-if ! npm run db:push >.codespaces/logs/db-push.log 2>&1; then
-  tail -n 100 .codespaces/logs/db-push.log >&2 || true
-  exit 1
-fi
+stop_service() {
+  local name="$1"
+  local port="$2"
+  local pid_file=".codespaces/pids/${name}.pid"
+
+  if [ -f "$pid_file" ]; then
+    local old_pid
+    old_pid="$(cat "$pid_file" 2>/dev/null || true)"
+    if [ -n "$old_pid" ] && kill -0 "$old_pid" >/dev/null 2>&1; then
+      echo "[ELSYSTAR] Stopping ${name} (pid ${old_pid})..."
+      kill -TERM -- "-${old_pid}" >/dev/null 2>&1 || kill -TERM "$old_pid" >/dev/null 2>&1 || true
+      for _ in $(seq 1 20); do
+        if ! kill -0 "$old_pid" >/dev/null 2>&1; then
+          break
+        fi
+        sleep 0.25
+      done
+      kill -KILL -- "-${old_pid}" >/dev/null 2>&1 || true
+    fi
+    rm -f "$pid_file"
+  fi
+
+  # Fallback for processes started by an older preview script that did not
+  # preserve a usable PID file.
+  if curl -fsS "http://127.0.0.1:${port}" >/dev/null 2>&1; then
+    echo "[ELSYSTAR] Stopping stale process on ${port}..."
+    pkill -f "next dev -p ${port}" >/dev/null 2>&1 || true
+    pkill -f "next-server.*${port}" >/dev/null 2>&1 || true
+    sleep 1
+  fi
+}
+
+run_step() {
+  local label="$1"
+  local timeout_seconds="$2"
+  local log_file="$3"
+  shift 3
+
+  echo "[ELSYSTAR] ${label}..."
+  : > "$log_file"
+
+  set +e
+  timeout "${timeout_seconds}s" "$@" 2>&1 | tee "$log_file"
+  local command_status=${PIPESTATUS[0]}
+  set -e
+
+  if [ "$command_status" -eq 124 ]; then
+    echo "[ELSYSTAR] ${label} timed out after ${timeout_seconds}s." >&2
+    return 1
+  fi
+  if [ "$command_status" -ne 0 ]; then
+    echo "[ELSYSTAR] ${label} failed with exit code ${command_status}." >&2
+    return "$command_status"
+  fi
+
+  echo "[ELSYSTAR] ${label}: done."
+}
 
 start_service() {
   local name="$1"
@@ -31,18 +79,8 @@ start_service() {
   local pid_file=".codespaces/pids/${name}.pid"
 
   if curl -fsS "http://127.0.0.1:${port}" >/dev/null 2>&1; then
-    echo "[ELSYSTAR] ${name} already listening on ${port}."
-    return 0
-  fi
-
-  if [ -f "$pid_file" ]; then
-    local old_pid
-    old_pid="$(cat "$pid_file" 2>/dev/null || true)"
-    if [ -n "$old_pid" ] && kill -0 "$old_pid" >/dev/null 2>&1; then
-      kill "$old_pid" >/dev/null 2>&1 || true
-      sleep 1
-    fi
-    rm -f "$pid_file"
+    echo "[ELSYSTAR] Port ${port} is still occupied; refusing to start a mixed-version preview." >&2
+    return 1
   fi
 
   : > "$log_file"
@@ -53,7 +91,7 @@ start_service() {
   local pid=$!
   echo "$pid" > "$pid_file"
 
-  for i in $(seq 1 60); do
+  for _ in $(seq 1 60); do
     if curl -fsS "http://127.0.0.1:${port}" >/dev/null 2>&1; then
       echo "[ELSYSTAR] ${name} is ready on ${port} (pid ${pid})."
       return 0
@@ -62,7 +100,7 @@ start_service() {
     if ! kill -0 "$pid" >/dev/null 2>&1; then
       echo "[ELSYSTAR] ${name} exited before becoming ready." >&2
       echo "----- ${log_file} -----" >&2
-      tail -n 80 "$log_file" >&2 || true
+      tail -n 100 "$log_file" >&2 || true
       return 1
     fi
 
@@ -71,9 +109,20 @@ start_service() {
 
   echo "[ELSYSTAR] ${name} did not become ready on ${port}." >&2
   echo "----- ${log_file} -----" >&2
-  tail -n 80 "$log_file" >&2 || true
+  tail -n 100 "$log_file" >&2 || true
   return 1
 }
+
+echo "[ELSYSTAR] Restarting preview on the current repository revision..."
+stop_service "web" 6300
+stop_service "admin" 6301
+
+# Server Action manifests and Turbopack state are tied to a particular source
+# revision. Remove them before starting a preview after git pull.
+rm -rf apps/web/.next apps/admin/.next
+
+run_step "Generating Prisma client" 180 .codespaces/logs/prisma-generate.log npm run db:generate
+run_step "Synchronizing development database schema" 180 .codespaces/logs/db-push.log npm run db:push
 
 start_service "web" 6300 "@elsystar/web"
 start_service "admin" 6301 "@elsystar/admin"
