@@ -13,6 +13,16 @@ else
   ADMIN_URL="http://localhost:6301"
 fi
 
+echo "[ELSYSTAR] Syncing Prisma client and development schema..."
+if ! npm run db:generate >.codespaces/logs/prisma-generate.log 2>&1; then
+  tail -n 100 .codespaces/logs/prisma-generate.log >&2 || true
+  exit 1
+fi
+if ! npm run db:push >.codespaces/logs/db-push.log 2>&1; then
+  tail -n 100 .codespaces/logs/db-push.log >&2 || true
+  exit 1
+fi
+
 start_service() {
   local name="$1"
   local port="$2"
