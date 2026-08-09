@@ -30,9 +30,7 @@ function safeEqual(left: string, right: string) {
 async function auditFailedLogin(email: string) {
   if (!isDatabaseConfigured() || !prisma) return;
   try {
-    await prisma.auditLog.create({
-      data: { actorEmail: email || "unknown", action: "auth.login_failed", entityType: "AdminAuth" },
-    });
+    await prisma.auditLog.create({ data: { actorEmail: email || "unknown", action: "auth.login_failed", entityType: "AdminAuth" } });
   } catch (error) {
     console.error("admin_failed_login_audit_failed", error);
   }
@@ -54,11 +52,7 @@ export async function authenticateAdmin(email: string, password: string): Promis
     }
   }
 
-  if (
-    process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD &&
-    safeEqual(normalized, process.env.ADMIN_EMAIL.trim().toLowerCase()) &&
-    safeEqual(password, process.env.ADMIN_PASSWORD)
-  ) {
+  if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD && safeEqual(normalized, process.env.ADMIN_EMAIL.trim().toLowerCase()) && safeEqual(password, process.env.ADMIN_PASSWORD)) {
     if (isDatabaseConfigured() && prisma) {
       try {
         await prisma.auditLog.create({ data: { actorEmail: normalized, action: "auth.bootstrap_login", entityType: "AdminAuth" } });
@@ -77,7 +71,6 @@ export async function createAdminSession(identity: Omit<AdminSession, "exp"> | A
   const store = await cookies();
   const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
   const name = adminCookieName();
-
   store.set(name, createAdminSessionToken({ ...identity, exp }), {
     httpOnly: true,
     sameSite: "strict",
@@ -86,7 +79,6 @@ export async function createAdminSession(identity: Omit<AdminSession, "exp"> | A
     maxAge: SESSION_TTL_SECONDS,
     priority: "high",
   });
-
   if (name !== LEGACY_ADMIN_COOKIE) store.delete(LEGACY_ADMIN_COOKIE);
 }
 
@@ -102,16 +94,10 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   const session = token ? verifyAdminSessionToken(token) : null;
   if (!session) return null;
 
-  // DB-backed sessions are revocable immediately. A disabled account or role change
-  // is reflected on the next request instead of waiting for the cookie TTL.
   if (session.userId && isDatabaseConfigured() && prisma) {
     try {
-      const user = await prisma.adminUser.findUnique({
-        where: { id: session.userId },
-        select: { active: true, email: true, role: true },
-      });
-      if (!user?.active || user.email.toLowerCase() !== session.email.toLowerCase()) return null;
-      return { ...session, role: user.role };
+      const user = await prisma.adminUser.findUnique({ where: { id: session.userId }, select: { active: true, email: true, role: true } });
+      if (!user?.active || user.email.toLowerCase() !== session.email.toLowerCase() || user.role !== session.role) return null;
     } catch (error) {
       console.error("admin_session_revalidation_failed", error);
       return null;
