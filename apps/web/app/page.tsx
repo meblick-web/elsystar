@@ -66,7 +66,7 @@ export default async function Home() {
         <LeadForm />
       </section>
 
-      <footer className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="/solutions">Решения</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="/about">О компании</a><a href="/production">Производство</a><a href="/projects">Проекты</a><a href="/contacts">Контакты</a></div><div><b>Связаться</b>{corporate.phonePrimary && <a href={`tel:${corporate.phonePrimary.replace(/[^+\d]/g,"")}`}>{corporate.phonePrimary}</a>}{corporate.emailPrimary && <a href={`mailto:${corporate.emailPrimary}`}>{corporate.emailPrimary}</a>}</div></div></footer>
+      <footer id="contacts" className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="/solutions">Решения</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="/about">О компании</a><a href="/production">Производство</a><a href="/projects">Проекты</a><a href="/contacts">Контакты</a></div><div><b>Связаться</b>{corporate.phonePrimary && <a href={`tel:${corporate.phonePrimary.replace(/[^+\d]/g,"")}`}>{corporate.phonePrimary}</a>}{corporate.emailPrimary && <a href={`mailto:${corporate.emailPrimary}`}>{corporate.emailPrimary}</a>}</div></div></footer>
     </main>
   );
 }
