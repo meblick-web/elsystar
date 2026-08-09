@@ -1,6 +1,6 @@
 {
   "name": "elsystar",
-  "version": "0.1.0-alpha.9.2",
+  "version": "0.1.0-alpha.9.3",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
