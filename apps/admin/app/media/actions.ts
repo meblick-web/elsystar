@@ -1,8 +1,9 @@
 "use server";
 
-import { MediaType, prisma } from "@elsystar/database";
+import { AdminRole, MediaType, prisma } from "@elsystar/database";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "../../lib/auth";
+import { requireRole } from "../../lib/auth";
+import { safeFileSize, safeHttpUrl, safeMediaMime } from "../../lib/content-validation";
 
 function readType(value: FormDataEntryValue | null) {
   const type = String(value ?? "IMAGE");
@@ -10,34 +11,38 @@ function readType(value: FormDataEntryValue | null) {
 }
 
 export async function createMediaAsset(formData: FormData) {
-  const session = await requireAdmin();
+  const session = await requireRole(AdminRole.ADMIN, AdminRole.EDITOR);
   if (!prisma) return;
 
-  const title = String(formData.get("title") ?? "").trim();
-  const url = String(formData.get("url") ?? "").trim();
-  if (!title || !url) return;
+  const title = String(formData.get("title") ?? "").trim().slice(0, 200);
+  const url = safeHttpUrl(String(formData.get("url") ?? ""));
+  const type = readType(formData.get("type"));
+  const mimeInput = String(formData.get("mimeType") ?? "").trim();
+  const mimeType = safeMediaMime(type, mimeInput);
+  if (!title || !url || (mimeInput && !mimeType)) return;
 
   const productId = String(formData.get("productId") ?? "").trim() || null;
   const asset = await prisma.mediaAsset.create({
     data: {
       title,
-      alt: String(formData.get("alt") ?? "").trim() || null,
-      type: readType(formData.get("type")),
+      alt: String(formData.get("alt") ?? "").trim().slice(0, 300) || null,
+      type,
       url,
       storageProvider: String(formData.get("storageProvider") ?? "external").trim().slice(0, 50) || "external",
-      storageKey: String(formData.get("storageKey") ?? "").trim() || null,
-      mimeType: String(formData.get("mimeType") ?? "").trim() || null,
+      storageKey: String(formData.get("storageKey") ?? "").trim().slice(0, 500) || null,
+      mimeType,
+      fileSize: safeFileSize(formData.get("fileSize")),
       productId,
       sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
     },
   });
 
-  await prisma.auditLog.create({ data: { actorEmail: session.email, action: "media.create", entityType: "MediaAsset", entityId: asset.id, payload: { title, productId } } });
+  await prisma.auditLog.create({ data: { actorEmail: session.email, action: "media.create", entityType: "MediaAsset", entityId: asset.id, payload: { title, productId, type, mimeType } } });
   revalidatePath("/media");
 }
 
 export async function deleteMediaAsset(assetId: string) {
-  const session = await requireAdmin();
+  const session = await requireRole(AdminRole.ADMIN, AdminRole.EDITOR);
   if (!prisma) return;
   await prisma.mediaAsset.delete({ where: { id: assetId } });
   await prisma.auditLog.create({ data: { actorEmail: session.email, action: "media.delete", entityType: "MediaAsset", entityId: assetId } });

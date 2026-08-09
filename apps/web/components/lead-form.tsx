@@ -8,7 +8,7 @@ type LeadFormProps = {
 };
 
 export function LeadForm({ productId, productLabel }: LeadFormProps) {
-  const [state, setState] = useState<"idle" | "sending" | "success" | "error" | "db">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "success" | "error" | "db" | "rate">("idle");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,6 +27,7 @@ export function LeadForm({ productId, productLabel }: LeadFormProps) {
         email: data.get("email"),
         phone: data.get("phone"),
         message: data.get("message"),
+        website: data.get("website"),
         productId,
         sourcePath: window.location.pathname,
         utmSource: params.get("utm_source"),
@@ -42,12 +43,16 @@ export function LeadForm({ productId, productLabel }: LeadFormProps) {
     }
 
     const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-    setState(payload?.error === "database_unavailable" ? "db" : "error");
+    if (response.status === 429 || payload?.error === "rate_limited") setState("rate");
+    else setState(payload?.error === "database_unavailable" ? "db" : "error");
   }
 
   return (
     <form className="leadForm" onSubmit={submit}>
       {productLabel ? <p className="leadContext">Запрос по продукту: <strong>{productLabel}</strong></p> : null}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+        <label>Сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
+      </div>
       <div className="formGrid">
         <label>Имя<input name="name" required minLength={2} maxLength={120} autoComplete="name" /></label>
         <label>Компания<input name="company" maxLength={160} autoComplete="organization" /></label>
@@ -60,7 +65,8 @@ export function LeadForm({ productId, productLabel }: LeadFormProps) {
         <span>Укажите телефон или email, чтобы мы могли связаться с вами.</span>
       </div>
       {state === "success" ? <p className="formNotice success">Запрос принят. Он появился в панели управления.</p> : null}
-      {state === "db" ? <p className="formNotice">Форма готова, но локальная PostgreSQL пока не подключена. После подключения БД запросы начнут сохраняться.</p> : null}
+      {state === "db" ? <p className="formNotice">Форма готова, но PostgreSQL сейчас недоступна. Повторите попытку позже.</p> : null}
+      {state === "rate" ? <p className="formNotice error">Слишком много запросов за короткое время. Подождите несколько минут и повторите.</p> : null}
       {state === "error" ? <p className="formNotice error">Не удалось отправить запрос. Проверьте контактные данные и повторите попытку.</p> : null}
     </form>
   );

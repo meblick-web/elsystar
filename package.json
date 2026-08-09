@@ -1,6 +1,6 @@
 {
   "name": "elsystar",
-  "version": "0.1.0-alpha.9.3",
+  "version": "0.2.0-beta.1",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
@@ -11,7 +11,10 @@
     "db:generate": "npm run generate --workspace=@elsystar/database",
     "db:push": "npm run db:push --workspace=@elsystar/database",
     "db:migrate": "npm run db:migrate --workspace=@elsystar/database",
-    "validate": "npm run typecheck && npm run build"
+    "db:backup": "bash scripts/backup-postgres.sh",
+    "db:restore": "bash scripts/restore-postgres.sh",
+    "security:check": "node scripts/security-preflight.mjs",
+    "validate": "npm run security:check && npm run typecheck && npm run build"
   },
   "engines": { "node": ">=22.0.0" }
 }

@@ -512,3 +512,17 @@ model RedirectRule {
 
   @@index([enabled, updatedAt])
 }
+
+model SecurityRateLimit {
+  id          String   @id @default(cuid())
+  scope       String
+  keyHash     String
+  windowStart DateTime
+  count       Int      @default(0)
+  expiresAt   DateTime
+  updatedAt   DateTime @updatedAt
+
+  @@unique([scope, keyHash, windowStart])
+  @@index([expiresAt])
+  @@index([scope, expiresAt])
+}

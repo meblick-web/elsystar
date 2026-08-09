@@ -1,8 +1,8 @@
 "use server";
 
-import { LeadStatus, prisma } from "@elsystar/database";
+import { AdminRole, LeadStatus, prisma } from "@elsystar/database";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "../../lib/auth";
+import { requireRole } from "../../lib/auth";
 
 function parseStatus(value: FormDataEntryValue | null) {
   const status = String(value ?? "");
@@ -10,7 +10,7 @@ function parseStatus(value: FormDataEntryValue | null) {
 }
 
 export async function updateLeadStatus(leadId: string, formData: FormData) {
-  const session = await requireAdmin();
+  const session = await requireRole(AdminRole.ADMIN, AdminRole.SUPPORT);
   if (!prisma) return;
 
   const status = parseStatus(formData.get("status"));

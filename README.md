@@ -4,57 +4,55 @@
 
 ## Текущий baseline
 
-`v0.1.0-alpha.9.3 — Content & Visual QA`
+`v0.2.0-beta.1 — Security & Operations`
 
 ### Реализовано
 
-- плотная светлая B2B design system без избыточного пустого пространства;
-- полупрозрачные тематические фоны: дорожные сетки, схемы перекрёстков, линии движения и ITS-связи;
-- визуальные hero-блоки на ключевых публичных страницах;
-- изображения в карточках продукции, решений и проектов при наличии CMS media;
-- нейтральные технические placeholders, если редактор не задал изображение;
-- PostgreSQL/CMS является источником истины для видимого редакторского контента при подключённой БД;
-- одноразовый bootstrap импортирует ранее кодовый visible content в CMS, не перезаписывая существующие записи;
-- главная CMS управляет hero, CTA, trust-strip, заголовками продукции/решений/проектов, поддержкой и коммерческим запросом;
-- demo-проекты существуют как обычные редактируемые Project-записи в БД;
-- признак `isDemo` и до трёх KPI проекта редактируются явно, без разбора текста результата;
-- demo-контент всегда имеет публичную маркировку и не выдаётся за фактическое внедрение;
-- административный `/content-qa` показывает пробелы в изображениях, описаниях, KPI, документации и корпоративных данных;
-- единая визуальная система административной панели;
-- адаптивный sticky header и доступная мобильная навигация публичного сайта;
-- мобильная горизонтальная навигация админки вместо исчезающего sidebar;
-- унифицированные карточки, таблицы, формы, фильтры, CTA, hover/focus состояния;
-- responsive-полировка каталога, карточек продукта, решений, проектов, документации и корпоративных страниц;
-- отдельные loading, error и 404 состояния public/admin;
-- поддержка `prefers-reduced-motion`;
-- PostgreSQL + Prisma 7 data layer;
-- иерархические категории продукции;
-- структурированные характеристики, преимущества и комплектации;
-- изображения/галереи и главное изображение товара;
-- связи товаров с решениями, проектами и совместимыми/альтернативными товарами;
-- полноценные публичные карточки продукции;
-- Documentation & Software Center с сериями материалов и историей версий;
-- текущая версия + архив предыдущих версий;
-- release notes, SHA-256, дата релиза, размер/MIME для ПО и прошивок;
-- поиск и фильтры документации по типу, продукту и языку;
-- Corporate Content CMS: компания, производство, контакты, реквизиты, компетенции, FAQ и корпоративные изображения;
-- публичные `/about`, `/production`, `/contacts`, `/faq`;
-- привязка корпоративных изображений из общей медиатеки;
-- fallback корпоративного контента используется только при недоступной/неподключённой БД;
-- непроверенные адрес/ИНН/КПП/ОГРН намеренно не заполняются автоматически;
-- заявки и provider-neutral медиатека;
-- аналитика: посетители, сессии, просмотры, источники, устройства, товары, скачивания, заявки и конверсия;
+- плотная светлая B2B design system с тематическими дорожными/ITS-фонами;
+- responsive public/admin UI, loading/error/404 и `prefers-reduced-motion`;
+- PostgreSQL/CMS является источником истины для редакторского контента;
+- главная CMS, каталог продукции, решения, проекты, Corporate Content, FAQ, документация и медиатека;
+- explicit demo-project flag и до трёх редактируемых KPI;
+- `/content-qa` для поиска пробелов в изображениях, описаниях, KPI, документации и корпоративных данных;
+- иерархические категории, характеристики, преимущества, комплектации и product relations;
+- Documentation & Software Center с сериями, текущими/архивными версиями, release notes и SHA-256;
+- аналитика посетителей, сессий, просмотров, источников, устройств, товаров, скачиваний, заявок и конверсии;
 - пользователи админки и роли `ADMIN / EDITOR / SUPPORT / ANALYST`;
+- серверный RBAC на admin routes и повторная проверка прав в mutating actions;
+- DB-backed admin sessions отзываются при деактивации пользователя или смене роли;
+- HMAC-signed admin cookie, 8h TTL, HttpOnly, SameSite Strict, Secure `__Host-` cookie в HTTPS/Codespaces/production;
+- PostgreSQL-backed rate limiting login/leads/analytics без хранения plaintext IP в rate-limit storage;
+- commercial lead honeypot и validation/payload limits публичных API;
+- CSP, frame protection, `nosniff`, Referrer Policy, Permissions Policy и production HSTS;
+- allowlist validation внешних media/document URL, MIME, filename и size metadata;
+- public/admin `/api/health`;
+- PostgreSQL custom-format backup + SHA-256 и guarded restore;
+- production security preflight `npm run security:check`;
 - журнал административных действий;
-- SEO и управляемые 301/302 redirects;
-- GitHub Codespaces-среда: Node.js 22 + PostgreSQL 16 + автоматический запуск web/admin и синхронизация Prisma-схемы;
-- guarded Prisma push для безопасной синхронизации development-схемы;
-- обычный HTTP POST для admin login;
-- Codespaces preview-proxy нормализует Host/X-Forwarded-* для HTTP, Server Actions и HMR.
+- SEO metadata/redirect foundation уже существует; полноценная индексация и internet visibility запланированы на `beta.2`;
+- GitHub Codespaces: Node.js 22 + PostgreSQL 16 + автоматический запуск public/admin, guarded Prisma push и content bootstraps.
+
+## Security & Operations
+
+Полный runbook: `docs/OPERATIONS.md`.
+
+Основные команды:
+
+```bash
+npm run security:check
+npm run db:backup
+ELSYSTAR_RESTORE_CONFIRM=YES npm run db:restore -- /path/to/elsystar.dump
+```
+
+Production security gate:
+
+```bash
+NODE_ENV=production npm run security:check
+```
 
 ## GitHub Codespaces
 
-Репозиторий содержит `.devcontainer/devcontainer.json` и полностью готов для облачной разработки без локального ПК.
+Репозиторий содержит `.devcontainer/devcontainer.json` и готов для облачной разработки без локального ПК.
 
 При создании/запуске Codespace автоматически:
 
@@ -64,24 +62,29 @@
 4. очищается revision-dependent `.next` state;
 5. генерируется Prisma Client;
 6. безопасно синхронизируется development-схема БД;
-7. импортируется отсутствующий visible content в CMS и выполняются одноразовые content migrations;
+7. импортируется отсутствующий visible content и выполняются одноразовые content migrations;
 8. Next.js запускается на внутренних портах `16300/16301`;
 9. локальный preview-proxy публикует пользовательские `6300/6301` и нормализует reverse-proxy headers;
-10. внутренние порты помечены как служебные и не должны использоваться для обычной проверки сайта.
+10. внутренние порты остаются служебными.
 
-Prisma/bootstrap-команды показывают прогресс непосредственно в терминале и имеют защитный timeout.
+Обновление текущего Codespace:
 
-Подробности: `docs/CODESPACES.md`.
+```bash
+git pull && bash .devcontainer/start-preview.sh
+```
+
+Preview credentials являются только development credentials и не должны использоваться в production.
 
 ## Структура
 
 - `apps/web` — публичный сайт, локально `http://localhost:6300`
 - `apps/admin` — административная панель, локально `http://localhost:6301`
-- `packages/database` — Prisma/PostgreSQL и одноразовые content bootstrap scripts
-- `packages/analytics` — контракты событий аналитики
+- `packages/database` — Prisma/PostgreSQL, rate limit storage и content bootstrap scripts
+- `packages/analytics` — контракты аналитики
 - `packages/shared` — общие типы
 - `.devcontainer` — GitHub Codespaces environment
-- `docs` — архитектура, источники контента и release notes
+- `scripts` — security preflight, backup/restore
+- `docs` — архитектура, runbooks, источники контента и release notes
 
 ## Локальный запуск
 
@@ -97,7 +100,7 @@ npm run dev:web
 npm run dev:admin
 ```
 
-Для сохранения каталога, корпоративного контента, пользователей, SEO, заявок, документации и аналитики нужен PostgreSQL и `DATABASE_URL`.
+Для persistence нужен PostgreSQL и `DATABASE_URL`.
 
 ## Работа с БД
 
@@ -105,31 +108,33 @@ npm run dev:admin
 npm run db:generate
 npm run db:push
 npm run db:migrate
+npm run db:backup
 ```
 
-Bootstrap-доступ задаётся через `ADMIN_EMAIL`, `ADMIN_PASSWORD` и `ADMIN_SESSION_SECRET`; после создания DB-пользователей он остаётся резервным каналом восстановления.
+Bootstrap-доступ задаётся через `ADMIN_EMAIL`, `ADMIN_PASSWORD` и `ADMIN_SESSION_SECRET`; после создания DB-пользователей он остаётся только recovery-механизмом. Для rate-limit HMAC задайте отдельный `SECURITY_HASH_SECRET`.
 
 ## Проверки
 
 ```bash
 npm audit --omit=dev --audit-level=high
+npm run security:check
 npm run db:generate
 npm run typecheck
 npm run build
 ```
 
-CI дополнительно проверяет Docker Compose, shell-скрипты Codespaces, guarded Prisma push, visible-content bootstrap, alpha9.3 QA bootstrap и preview-proxy.
+CI дополнительно проверяет Docker Compose, Codespaces scripts, guarded Prisma push, content bootstraps, security preflight и backup/restore shell scripts.
 
 ## Принципы
 
-- публичная часть остаётся лёгкой и быстрой;
-- сложность управления переносится в отдельную админ-панель;
+- публичная часть остаётся лёгкой; сложность управления живёт в отдельной админке;
 - нет универсального page builder, способного разрушить дизайн;
-- продуктовые, проектные, документные и корпоративные данные хранятся в нормализованных типизированных сущностях;
-- при подключённой БД CMS является единственным источником редакторского контента;
+- CMS является единственным источником редакторского контента при подключённой БД;
 - декоративные дорожные схемы/сетки являются частью design system, а не CMS-контентом;
 - demo-контент всегда явно помечается и не выдаётся за фактическое внедрение;
 - непроверенные корпоративные факты не публикуются автоматически;
-- файлы и storage не привязаны к конкретному хостингу заранее;
-- аналитика строится вокруг полезных бизнес-событий;
-- публичный сайт и админка используют единую модель данных.
+- binary storage не привязан к провайдеру до выбора production hosting;
+- права проверяются сервером, а не только интерфейсом;
+- публичные abuse controls используют DB-backed rate limit;
+- backup/restore и production preflight являются частью release process;
+- public и admin используют единую модель данных.

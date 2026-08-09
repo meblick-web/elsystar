@@ -18,20 +18,21 @@ export default async function LoginPage({
 
         {!configured && (
           <div className="loginNotice">
-            Для входа задайте <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code> и <code>ADMIN_SESSION_SECRET</code>.
+            Для входа задайте <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code> и секрет <code>ADMIN_SESSION_SECRET</code> длиной не менее 32 символов.
           </div>
         )}
 
-        {params.error && <div className="loginError">Неверный email или пароль.</div>}
+        {params.error === "rate" && <div className="loginError">Слишком много попыток входа. Подождите несколько минут и повторите.</div>}
+        {params.error && params.error !== "rate" && <div className="loginError">Неверный email или пароль.</div>}
 
         <form action="/api/auth/login" method="post" className="loginForm">
           <label>
             <span>Email</span>
-            <input name="email" type="email" autoComplete="username" required disabled={!configured} />
+            <input name="email" type="email" autoComplete="username" required maxLength={320} disabled={!configured} />
           </label>
           <label>
             <span>Пароль</span>
-            <input name="password" type="password" autoComplete="current-password" required disabled={!configured} />
+            <input name="password" type="password" autoComplete="current-password" required maxLength={512} disabled={!configured} />
           </label>
           <button className="primary loginButton" type="submit" disabled={!configured}>Войти</button>
         </form>

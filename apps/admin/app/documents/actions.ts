@@ -4,6 +4,7 @@ import { AdminRole, DocumentType, prisma } from "@elsystar/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "../../lib/auth";
+import { safeDocumentMime, safeFileName, safeFileSize, safeHttpUrl } from "../../lib/content-validation";
 
 function readType(value: FormDataEntryValue | null) {
   const type = String(value ?? "OTHER");
@@ -42,18 +43,7 @@ export async function createSeries(formData: FormData) {
   const productId = String(formData.get("productId") ?? "").trim() || null;
   if (!title || !slug) redirect("/documents?error=required#new-series");
 
-  const series = await prisma.documentSeries.create({
-    data: {
-      title,
-      slug,
-      description: String(formData.get("description") ?? "").trim() || null,
-      type: readType(formData.get("type")),
-      language,
-      productId,
-      sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
-    },
-  });
-
+  const series = await prisma.documentSeries.create({ data: { title, slug, description: String(formData.get("description") ?? "").trim() || null, type: readType(formData.get("type")), language, productId, sortOrder: Number(formData.get("sortOrder") ?? 0) || 0 } });
   await prisma.auditLog.create({ data: { actorEmail: session.email, action: "document_series.create", entityType: "DocumentSeries", entityId: series.id, payload: { title, slug, productId, type: series.type, language } } });
   revalidatePath("/documents");
   redirect(`/documents/${series.id}?created=1`);
@@ -74,9 +64,7 @@ export async function updateSeries(seriesId: string, formData: FormData) {
     await tx.document.updateMany({ where: { seriesId }, data: { title, type, language, productId } });
   });
   await prisma.auditLog.create({ data: { actorEmail: session.email, action: "document_series.update", entityType: "DocumentSeries", entityId: seriesId, payload: { title, slug, type, language, productId } } });
-  revalidatePath("/documents");
-  revalidatePath(`/documents/${seriesId}`);
-  revalidatePath("/support");
+  revalidatePath("/documents"); revalidatePath(`/documents/${seriesId}`); revalidatePath("/support");
 }
 
 export async function deleteSeries(seriesId: string) {
@@ -97,10 +85,12 @@ export async function createVersion(seriesId: string, formData: FormData) {
   const series = await prisma.documentSeries.findUnique({ where: { id: seriesId } });
   if (!series) redirect("/documents");
 
-  const version = String(formData.get("version") ?? "").trim();
-  const fileUrl = String(formData.get("fileUrl") ?? "").trim();
-  const fileName = String(formData.get("fileName") ?? "").trim();
-  if (!version || !fileUrl || !fileName) redirect(`/documents/${seriesId}?error=version-required#new-version`);
+  const version = String(formData.get("version") ?? "").trim().slice(0, 80);
+  const fileUrl = safeHttpUrl(String(formData.get("fileUrl") ?? ""));
+  const fileName = safeFileName(String(formData.get("fileName") ?? ""));
+  const mimeInput = String(formData.get("mimeType") ?? "").trim();
+  const mimeType = safeDocumentMime(mimeInput);
+  if (!version || !fileUrl || !fileName || (mimeInput && !mimeType)) redirect(`/documents/${seriesId}?error=unsafe-file#new-version`);
 
   const makeCurrent = formData.get("isCurrent") === "on";
   const publish = formData.get("published") === "on";
@@ -111,73 +101,36 @@ export async function createVersion(seriesId: string, formData: FormData) {
 
   const document = await prisma.$transaction(async (tx) => {
     if (makeCurrent) await tx.document.updateMany({ where: { seriesId, isCurrent: true }, data: { isCurrent: false } });
-    return tx.document.create({
-      data: {
-        seriesId,
-        title: series.title,
-        description: String(formData.get("description") ?? "").trim() || null,
-        type: series.type,
-        fileUrl,
-        fileName,
-        version,
-        language: series.language,
-        mimeType: String(formData.get("mimeType") ?? "").trim() || null,
-        fileSize: Number(formData.get("fileSize") ?? 0) || null,
-        checksumSha256,
-        releaseNotes: String(formData.get("releaseNotes") ?? "").trim() || null,
-        releaseDate,
-        isCurrent: makeCurrent,
-        isPublic: formData.get("isPublic") === "on",
-        publishedAt: publish ? new Date() : null,
-        productId: series.productId,
-        sortOrder: Number(formData.get("sortOrder") ?? 0) || 0,
-      },
-    });
+    return tx.document.create({ data: { seriesId, title: series.title, description: String(formData.get("description") ?? "").trim() || null, type: series.type, fileUrl, fileName, version, language: series.language, mimeType, fileSize: safeFileSize(formData.get("fileSize")), checksumSha256, releaseNotes: String(formData.get("releaseNotes") ?? "").trim() || null, releaseDate, isCurrent: makeCurrent, isPublic: formData.get("isPublic") === "on", publishedAt: publish ? new Date() : null, productId: series.productId, sortOrder: Number(formData.get("sortOrder") ?? 0) || 0 } });
   });
 
-  await prisma.auditLog.create({ data: { actorEmail: session.email, action: "document_version.create", entityType: "Document", entityId: document.id, payload: { seriesId, version, isCurrent: makeCurrent, published: publish } } });
-  revalidatePath("/documents");
-  revalidatePath(`/documents/${seriesId}`);
-  revalidatePath("/support");
-  revalidatePath(`/support/${series.slug}`);
+  await prisma.auditLog.create({ data: { actorEmail: session.email, action: "document_version.create", entityType: "Document", entityId: document.id, payload: { seriesId, version, isCurrent: makeCurrent, published: publish, mimeType } } });
+  revalidatePath("/documents"); revalidatePath(`/documents/${seriesId}`); revalidatePath("/support"); revalidatePath(`/support/${series.slug}`);
   redirect(`/documents/${seriesId}?versionCreated=1`);
 }
 
 export async function setCurrentVersion(documentId: string, seriesId: string) {
-  const session = await documentationSession();
-  if (!prisma) return;
-  await prisma.$transaction([
-    prisma.document.updateMany({ where: { seriesId, isCurrent: true }, data: { isCurrent: false } }),
-    prisma.document.update({ where: { id: documentId }, data: { isCurrent: true } }),
-  ]);
+  const session = await documentationSession(); if (!prisma) return;
+  await prisma.$transaction([prisma.document.updateMany({ where: { seriesId, isCurrent: true }, data: { isCurrent: false } }), prisma.document.update({ where: { id: documentId }, data: { isCurrent: true } })]);
   await prisma.auditLog.create({ data: { actorEmail: session.email, action: "document_version.current", entityType: "Document", entityId: documentId, payload: { seriesId } } });
-  revalidatePath(`/documents/${seriesId}`);
-  revalidatePath("/support");
+  revalidatePath(`/documents/${seriesId}`); revalidatePath("/support");
 }
 
 export async function toggleDocument(documentId: string) {
-  const session = await documentationSession();
-  if (!prisma) return;
+  const session = await documentationSession(); if (!prisma) return;
   const current = await prisma.document.findUnique({ where: { id: documentId }, select: { publishedAt: true, seriesId: true, series: { select: { slug: true } } } });
   if (!current) return;
   const publishedAt = current.publishedAt ? null : new Date();
   await prisma.document.update({ where: { id: documentId }, data: { publishedAt } });
   await prisma.auditLog.create({ data: { actorEmail: session.email, action: publishedAt ? "document.publish" : "document.unpublish", entityType: "Document", entityId: documentId } });
-  revalidatePath("/documents");
-  if (current.seriesId) revalidatePath(`/documents/${current.seriesId}`);
-  revalidatePath("/support");
-  if (current.series?.slug) revalidatePath(`/support/${current.series.slug}`);
+  revalidatePath("/documents"); if (current.seriesId) revalidatePath(`/documents/${current.seriesId}`); revalidatePath("/support"); if (current.series?.slug) revalidatePath(`/support/${current.series.slug}`);
 }
 
 export async function deleteDocument(documentId: string) {
-  const session = await documentationSession();
-  if (!prisma) return;
+  const session = await documentationSession(); if (!prisma) return;
   const document = await prisma.document.findUnique({ where: { id: documentId }, select: { seriesId: true, series: { select: { slug: true } }, version: true } });
   if (!document) return;
   await prisma.document.delete({ where: { id: documentId } });
   await prisma.auditLog.create({ data: { actorEmail: session.email, action: "document.delete", entityType: "Document", entityId: documentId, payload: { seriesId: document.seriesId, version: document.version } } });
-  revalidatePath("/documents");
-  if (document.seriesId) revalidatePath(`/documents/${document.seriesId}`);
-  revalidatePath("/support");
-  if (document.series?.slug) revalidatePath(`/support/${document.series.slug}`);
+  revalidatePath("/documents"); if (document.seriesId) revalidatePath(`/documents/${document.seriesId}`); revalidatePath("/support"); if (document.series?.slug) revalidatePath(`/support/${document.series.slug}`);
 }

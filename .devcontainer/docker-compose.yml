@@ -15,6 +15,7 @@ services:
       ADMIN_EMAIL: admin@elsystar.local
       ADMIN_PASSWORD: codespaces-preview-only
       ADMIN_SESSION_SECRET: codespaces-preview-session-secret-change-for-production
+      SECURITY_HASH_SECRET: codespaces-preview-security-hash-secret-change-for-production
 
   db:
     image: postgres:16-bookworm
