@@ -1,16 +1,16 @@
 "use server";
 
-import { prisma } from "@elsystar/database";
+import { AdminRole, prisma } from "@elsystar/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "../../lib/auth";
+import { requireRole } from "../../lib/auth";
 
 function text(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
 }
 
 export async function updateHomepage(formData: FormData) {
-  const session = await requireAdmin();
+  const session = await requireRole(AdminRole.ADMIN, AdminRole.EDITOR);
   if (!prisma) redirect("/homepage?error=db");
 
   const heroTitle = text(formData, "heroTitle");
