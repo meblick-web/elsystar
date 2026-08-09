@@ -111,7 +111,7 @@ start_service() {
   : > "$proxy_log"
   echo "[ELSYSTAR] Starting ${name} Next.js on internal port ${internal_port}..."
 
-  setsid bash -lc "cd '/workspace/${app_dir}' && export NEXT_PUBLIC_SITE_URL='${SITE_URL}' NEXT_PUBLIC_ADMIN_URL='${ADMIN_URL}' && exec ../../node_modules/.bin/next dev -p '${internal_port}' --hostname 127.0.0.1" \
+  setsid bash -lc "cd '/workspace/${app_dir}' && export NEXT_PUBLIC_SITE_URL='${SITE_URL}' NEXT_PUBLIC_ADMIN_URL='${ADMIN_URL}' SEO_INDEXING_ENABLED='false' && exec ../../node_modules/.bin/next dev -p '${internal_port}' --hostname 127.0.0.1" \
     </dev/null >>"$next_log" 2>&1 &
   local next_pid=$!
   echo "$next_pid" > ".codespaces/pids/${name}-next.pid"
@@ -131,13 +131,13 @@ echo "[ELSYSTAR] Restarting preview on the current repository revision..."
 stop_service "web" 6300 16300
 stop_service "admin" 6301 16301
 
-# Server Action manifests and Turbopack state are tied to a particular source revision.
 rm -rf apps/web/.next apps/admin/.next
 
 run_step "Generating Prisma client" 180 .codespaces/logs/prisma-generate.log npm run db:generate
 run_step "Synchronizing development database schema" 180 .codespaces/logs/db-push.log node packages/database/scripts/codespaces-safe-push.mjs
 run_step "Importing visible content into CMS" 120 .codespaces/logs/content-bootstrap.log node packages/database/scripts/bootstrap-visible-content.mjs
 run_step "Synchronizing alpha9.3 CMS QA fields" 120 .codespaces/logs/content-qa-bootstrap.log node packages/database/scripts/bootstrap-content-qa-alpha9-3.mjs
+run_step "Synchronizing beta2 SEO defaults and redirects" 120 .codespaces/logs/seo-bootstrap.log node packages/database/scripts/bootstrap-seo-beta2.mjs
 
 start_service "web" 6300 16300 "apps/web" "$SITE_HOST"
 start_service "admin" 6301 16301 "apps/admin" "$ADMIN_HOST"
@@ -145,3 +145,4 @@ start_service "admin" 6301 16301 "apps/admin" "$ADMIN_HOST"
 echo "[ELSYSTAR] Preview is ready."
 echo "[ELSYSTAR] Public site: ${SITE_URL}"
 echo "[ELSYSTAR] Admin:       ${ADMIN_URL}"
+echo "[ELSYSTAR] Search indexing is disabled for preview environments."
