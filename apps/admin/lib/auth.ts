@@ -10,6 +10,7 @@ import {
   LEGACY_ADMIN_COOKIE,
   SECURE_ADMIN_COOKIE,
   SESSION_TTL_SECONDS,
+  SessionAdminRole,
   SignedAdminSession,
   verifyAdminSessionToken,
 } from "./session-token";
@@ -45,7 +46,7 @@ export async function authenticateAdmin(email: string, password: string): Promis
       if (user?.active && verifyPassword(password, user.passwordHash)) {
         await prisma.adminUser.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
         await prisma.auditLog.create({ data: { actorEmail: user.email, action: "auth.login", entityType: "AdminUser", entityId: user.id } });
-        return { email: user.email, role: user.role, userId: user.id, exp: 0 };
+        return { email: user.email, role: user.role as SessionAdminRole, userId: user.id, exp: 0 };
       }
     } catch (error) {
       console.error("admin_db_auth_failed", error);
@@ -60,7 +61,7 @@ export async function authenticateAdmin(email: string, password: string): Promis
         console.error("bootstrap_login_audit_failed", error);
       }
     }
-    return { email: normalized, role: AdminRole.ADMIN, exp: 0 };
+    return { email: normalized, role: "ADMIN", exp: 0 };
   }
 
   await auditFailedLogin(normalized);
@@ -97,7 +98,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   if (session.userId && isDatabaseConfigured() && prisma) {
     try {
       const user = await prisma.adminUser.findUnique({ where: { id: session.userId }, select: { active: true, email: true, role: true } });
-      if (!user?.active || user.email.toLowerCase() !== session.email.toLowerCase() || user.role !== session.role) return null;
+      if (!user?.active || user.email.toLowerCase() !== session.email.toLowerCase() || String(user.role) !== session.role) return null;
     } catch (error) {
       console.error("admin_session_revalidation_failed", error);
       return null;
@@ -115,6 +116,6 @@ export async function requireAdmin() {
 
 export async function requireRole(...roles: AdminRole[]) {
   const session = await requireAdmin();
-  if (!roles.includes(session.role)) redirect("/?error=forbidden");
+  if (!roles.map(String).includes(session.role)) redirect("/?error=forbidden");
   return session;
 }
