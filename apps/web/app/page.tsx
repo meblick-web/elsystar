@@ -28,7 +28,7 @@ export default async function Home() {
           <p className="lead">{content.heroDescription}</p>
           <div className="heroButtons"><a className="button" data-analytics="cta_click" href={content.primaryCtaHref}>{content.primaryCtaLabel}</a><a className="button ghost" href={content.secondaryCtaHref}>{content.secondaryCtaLabel}</a></div>
         </div>
-        <div className="heroVisual" aria-hidden="true">
+        <div className="heroVisual" aria-label="Городская транспортная инфраструктура и дорожный контроллер">
           <div className="signal"><i></i><i></i><i className="active"></i></div>
           <div className="cabinet"><div className="cabinetLogo">ELSYSTAR</div><div className="vents"></div><div className="handle"></div><small>УК-4.1М</small></div>
         </div>
@@ -36,11 +36,14 @@ export default async function Home() {
 
       <section className="trust shell"><div><strong>30+</strong><span>лет инженерного опыта</span></div><div><strong>Собственное</strong><span>производство оборудования</span></div><div><strong>Комплексно</strong><span>от контроллера до АСУДТ</span></div></section>
 
-      <section className="companyTeaser shell"><div><p className="eyebrow">{corporate.aboutEyebrow}</p><h2>{corporate.aboutTitle}</h2><p>{corporate.aboutLead}</p></div><div className="companyTeaserActions"><a className="textLink" href="/about">О компании →</a><a className="textLink" href="/production">Производство →</a></div></section>
+      <section id="products" className="section shell">
+        <div className="sectionHead"><div><p className="eyebrow">ПРОДУКЦИЯ</p><h2>Основные контроллеры</h2></div><a href="/products">Вся продукция →</a></div>
+        <div className="productGrid">{products.map((product) => <article key={product.id}>{product.mediaAssets[0] ? <img src={product.mediaAssets[0].url} alt={product.mediaAssets[0].alt ?? product.name} /> : <div className="miniCabinet"></div>}<div><h3>{product.model}</h3><p>{product.shortDescription}</p><a data-analytics="product_view" data-product-id={product.id} href={`/products/${product.slug}`}>Подробнее →</a></div></article>)}</div>
+      </section>
 
       <section id="solutions" className="section shell">
         <div className="sectionHead"><div><p className="eyebrow">{content.solutionsEyebrow}</p><h2>{content.solutionsTitle}</h2></div><a href="/solutions">Все решения →</a></div>
-        <div className="threeCards">{solutions.slice(0, 3).map((solution, index) => <article key={solution.id}><div className="icon">{index === 0 ? "◇" : index === 1 ? "⌁" : "↗"}</div><h3>{solution.name}</h3><p>{solution.shortDescription}</p><a href={`/solutions/${solution.slug}`}>Подробнее →</a></article>)}</div>
+        <div className="threeCards">{solutions.slice(0, 3).map((solution, index) => <article className="solutionVisualCard" key={solution.id}>{solution.imageUrl && <img src={solution.imageUrl} alt={solution.name} />}<div className="visualCardBody"><div className="icon">{index === 0 ? "◇" : index === 1 ? "⌁" : "↗"}</div><h3>{solution.name}</h3><p>{solution.shortDescription}</p><a href={`/solutions/${solution.slug}`}>Подробнее →</a></div></article>)}</div>
       </section>
 
       {platform && <section id="megapolis" className="megapolis shell">
@@ -48,15 +51,12 @@ export default async function Home() {
         <div className="map"><span className="road r1"></span><span className="road r2"></span><span className="road r3"></span><i></i><i></i><i></i></div>
       </section>}
 
-      <section id="products" className="section shell">
-        <div className="sectionHead"><div><p className="eyebrow">ПРОДУКЦИЯ</p><h2>Основные контроллеры</h2></div><a href="/products">Вся продукция →</a></div>
-        <div className="productGrid">{products.map((product) => <article key={product.id}><div className="miniCabinet"></div><div><h3>{product.model}</h3><p>{product.shortDescription}</p><a data-analytics="product_view" data-product-id={product.id} href={`/products/${product.slug}`}>Подробнее →</a></div></article>)}</div>
-      </section>
-
       {projects.length > 0 && <section className="section shell homeProjects">
         <div className="sectionHead"><div><p className="eyebrow">{content.projectsEyebrow}</p><h2>{content.projectsTitle}</h2></div><a href="/projects">Все проекты →</a></div>
-        <div className="homeProjectGrid">{projects.slice(0, 3).map((project) => <article key={project.id}><span>{[project.city, project.year].filter(Boolean).join(" · ") || "Проект ELSYSTAR"}</span><h3>{project.title}</h3><p>{project.summary}</p><a href={`/projects/${project.slug}`}>Подробнее →</a></article>)}</div>
+        <div className="homeProjectGrid">{projects.slice(0, 3).map((project) => <article key={project.id}>{project.coverImageUrl && <img src={project.coverImageUrl} alt={project.city ? `Транспортная инфраструктура — ${project.city}` : project.title} />}<div className="projectCardBody">{project.isDemo && <span className="demoBadge">Демо-кейс</span>}<span>{[project.city, project.year].filter(Boolean).join(" · ") || "Проект ELSYSTAR"}</span><h3>{project.title}</h3><p>{project.summary}</p>{project.metrics && <div className="projectMetrics">{project.metrics.map((metric)=><div key={metric.label}><strong>{metric.value}</strong><span>{metric.label}</span></div>)}</div>}<a href={`/projects/${project.slug}`}>Подробнее →</a></div></article>)}</div>
       </section>}
+
+      <section className="companyTeaser shell"><div><p className="eyebrow">{corporate.aboutEyebrow}</p><h2>{corporate.aboutTitle}</h2><p>{corporate.aboutLead}</p></div><div className="companyTeaserActions"><a className="textLink" href="/about">О компании →</a><a className="textLink" href="/production">Производство →</a></div></section>
 
       <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>{content.supportTitle}</h2><p>{content.supportDescription}</p></div><div className="heroButtons"><a className="button ghost" data-analytics="cta_click" href="/support">Документация</a><a className="button ghost" href="/faq">FAQ</a></div></section>
 
