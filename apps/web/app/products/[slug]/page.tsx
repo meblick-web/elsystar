@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LeadForm } from "../../../components/lead-form";
 import { getProductBySlug } from "../../../lib/products";
+import { buildEntityMetadata } from "../../../lib/seo";
+import { productJsonLd } from "../../../lib/structured-data";
 
 const relationLabels: Record<string, string> = {
   COMPATIBLE: "Совместимое оборудование",
@@ -13,8 +15,14 @@ const relationLabels: Record<string, string> = {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "Продукт не найден — ELSYSTAR" };
-  return { title: product.seoTitle || `${product.name} — ELSYSTAR`, description: product.seoDescription || product.shortDescription };
+  if (!product) return { title: "Продукт не найден — ELSYSTAR", robots: { index: false, follow: false } };
+  const primaryImage = product.mediaAssets.find((item) => item.isPrimary) ?? product.mediaAssets[0];
+  return buildEntityMetadata({
+    path: `/products/${product.slug}`,
+    title: product.seoTitle || `${product.name} — ELSYSTAR`,
+    description: product.seoDescription || product.shortDescription,
+    image: primaryImage?.url,
+  });
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -22,8 +30,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
   const primaryImage = product.mediaAssets.find((item) => item.isPrimary) ?? product.mediaAssets[0];
+  const jsonLd = productJsonLd({
+    name: product.name,
+    model: product.model,
+    shortDescription: product.shortDescription,
+    slug: product.slug,
+    image: primaryImage?.url,
+    specifications: product.specifications,
+  });
 
   return <main>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <header className="header shell"><a className="logo" href="/">ELSY<span>STAR</span></a><nav><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/support">Документация</a><a href="/#contacts">Контакты</a></nav><div className="actions"><span>RU / EN</span><a className="button small" data-analytics="cta_click" data-product-id={product.id} href="#request">Получить КП</a></div></header>
 
     <section className="productHero shell"><div><a className="backLink" href={product.category ? `/products?category=${encodeURIComponent(product.category.slug)}` : "/products"}>← {product.category?.name ?? "Вся продукция"}</a><p className="eyebrow">{product.model}</p><h1>{product.name}</h1><p className="lead">{product.shortDescription}</p><div className="heroButtons"><a className="button" data-analytics="cta_click" data-product-id={product.id} href="#request">Запросить КП</a>{product.documents.length > 0 && <a className="button ghost" href="#documents">Документация</a>}</div></div>

@@ -8,6 +8,8 @@ export interface PublicSolution {
   description: string | null;
   type: string;
   imageUrl: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
 }
 
 export interface PublicProject {
@@ -22,6 +24,8 @@ export interface PublicProject {
   solutionText: string | null;
   result: string | null;
   coverImageUrl: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
   isDemo: boolean;
   metrics: Array<{ value: string; label: string }>;
 }
@@ -55,9 +59,9 @@ export const fallbackHomepage = {
 };
 
 const fallbackSolutions: PublicSolution[] = [
-  { id: "fallback-controllers", slug: "intersection-control", name: "Управление перекрёстками", shortDescription: "Локальное и сетевое управление светофорными объектами с диагностикой и контролем конфликтов.", description: null, type: "SOLUTION", imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=85" },
-  { id: "fallback-megapolis", slug: "megapolis", name: "АСУДТ «Мегаполис»", shortDescription: "Централизованный мониторинг, диспетчеризация и управление городской сетью дорожных объектов.", description: null, type: "PLATFORM", imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85" },
-  { id: "fallback-modernization", slug: "modernization", name: "Модернизация объектов", shortDescription: "Переход на современное оборудование и программное управление без ненужной замены всей инфраструктуры.", description: null, type: "SOLUTION", imageUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&q=85" },
+  { id: "fallback-controllers", slug: "intersection-control", name: "Управление перекрёстками", shortDescription: "Локальное и сетевое управление светофорными объектами с диагностикой и контролем конфликтов.", description: null, type: "SOLUTION", imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=85", seoTitle: null, seoDescription: null },
+  { id: "fallback-megapolis", slug: "megapolis", name: "АСУДТ «Мегаполис»", shortDescription: "Централизованный мониторинг, диспетчеризация и управление городской сетью дорожных объектов.", description: null, type: "PLATFORM", imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85", seoTitle: null, seoDescription: null },
+  { id: "fallback-modernization", slug: "modernization", name: "Модернизация объектов", shortDescription: "Переход на современное оборудование и программное управление без ненужной замены всей инфраструктуры.", description: null, type: "SOLUTION", imageUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&q=85", seoTitle: null, seoDescription: null },
 ];
 
 const demoProjects: PublicProject[] = [
@@ -73,6 +77,8 @@ const demoProjects: PublicProject[] = [
     solutionText: "В демонстрационном проекте применены дорожные контроллеры ELSYSTAR, детекторы транспорта, централизованный мониторинг и сценарии адаптивного управления. Объекты объединены в единый контур с журналом событий и удалённой диагностикой.",
     result: "Расчётный эффект демонстрационного сценария: снижение средней задержки до 18%, сокращение числа остановок до 14% и более быстрый поиск неисправностей за счёт единого мониторинга.",
     coverImageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1400&q=86",
+    seoTitle: null,
+    seoDescription: null,
     isDemo: true,
     metrics: [{ value: "42", label: "перекрёстка" }, { value: "126", label: "контроллеров" }, { value: "−18%", label: "расчётная задержка" }],
   },
@@ -88,6 +94,8 @@ const demoProjects: PublicProject[] = [
     solutionText: "Сценарий включает координированные планы, сетевое управление контроллерами, сбор данных с детекторов и диспетчерскую панель для контроля режимов и событий.",
     result: "Модельный результат: до 16% сокращения времени прохождения основного коридора и более стабильное распределение транспортного потока в часы пик.",
     coverImageUrl: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1400&q=86",
+    seoTitle: null,
+    seoDescription: null,
     isDemo: true,
     metrics: [{ value: "28", label: "перекрёстков" }, { value: "84", label: "контроллера" }, { value: "−16%", label: "время в пути" }],
   },
@@ -103,6 +111,8 @@ const demoProjects: PublicProject[] = [
     solutionText: "В сценарии используются контроллеры, резервируемые каналы связи, транспортные детекторы и централизованный журнал событий с оперативным контролем состояния каждого объекта.",
     result: "Расчётный эффект: до 20% снижения пиковых очередей и сокращение времени диагностики оборудования благодаря единому центру мониторинга.",
     coverImageUrl: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1400&q=86",
+    seoTitle: null,
+    seoDescription: null,
     isDemo: true,
     metrics: [{ value: "24", label: "объекта" }, { value: "72", label: "контроллера" }, { value: "−20%", label: "пиковые очереди" }],
   },
@@ -118,6 +128,8 @@ const demoProjects: PublicProject[] = [
     solutionText: "Проектная модель объединяет локальные контроллеры, телеметрию, централизованный сервер, операторские рабочие места и единый журнал событий. Архитектура рассчитана на поэтапное расширение.",
     result: "Демонстрационные KPI: единая наблюдаемость сети, сокращение ручных операций диспетчера и возможность централизованного изменения планов управления.",
     coverImageUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1400&q=86",
+    seoTitle: null,
+    seoDescription: null,
     isDemo: true,
     metrics: [{ value: "60+", label: "объектов" }, { value: "180", label: "контроллеров" }, { value: "24/7", label: "мониторинг" }],
   },
@@ -135,6 +147,8 @@ function normalizeProject(project: {
   solutionText: string | null;
   result: string | null;
   coverImageUrl: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
   isDemo: boolean;
   metric1Value: string | null;
   metric1Label: string | null;
@@ -161,6 +175,8 @@ function normalizeProject(project: {
     solutionText: project.solutionText,
     result: project.result,
     coverImageUrl: project.coverImageUrl,
+    seoTitle: project.seoTitle,
+    seoDescription: project.seoDescription,
     isDemo: project.isDemo,
     metrics,
   };

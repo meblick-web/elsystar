@@ -1,13 +1,32 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProjectBySlug } from "../../../lib/content";
+import { buildEntityMetadata } from "../../../lib/seo";
+import { projectJsonLd } from "../../../lib/structured-data";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+  if (!project) return { title: "Проект не найден — ELSYSTAR", robots: { index: false, follow: false } };
+  return buildEntityMetadata({
+    path: `/projects/${project.slug}`,
+    title: project.seoTitle || `${project.title} — ELSYSTAR`,
+    description: project.seoDescription || project.summary,
+    image: project.coverImageUrl,
+    index: !project.isDemo,
+    type: "article",
+  });
+}
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
+  const jsonLd = !project.isDemo ? projectJsonLd(project) : null;
 
   return (
     <main>
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />}
       <header className="header shell">
         <a className="logo" href="/">ELSY<span>STAR</span></a>
         <nav><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/support">Документация</a><a href="/about">О компании</a><a href="/contacts">Контакты</a></nav>
