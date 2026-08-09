@@ -48,7 +48,6 @@ try {
     `, [`beta2-redirect-${fromPath.slice(1).replaceAll(/[^a-z0-9]+/gi, "-")}`, fromPath, toPath]);
   }
 
-  // Verified public facts from the legacy ELSYSTAR pages are used only to fill empty CMS fields.
   await client.query(`
     UPDATE "Solution"
     SET
@@ -57,6 +56,7 @@ try {
       "seoDescription" = COALESCE("seoDescription", $3),
       "updatedAt" = NOW()
     WHERE "slug" = 'megapolis'
+      AND ("description" IS NULL OR "seoTitle" IS NULL OR "seoDescription" IS NULL)
   `, [
     "АСУДТ «Мегаполис» — модульная система централизованного управления дорожным движением. Архитектура объединяет серверные и диспетчерские компоненты, мониторинг транспортных потоков, координированное и адаптивное управление. Для интеграции предусмотрены стандартные сетевые интерфейсы и HTTP API.",
     "АСУДТ «Мегаполис» — система управления дорожным движением ELSYSTAR",
@@ -73,8 +73,10 @@ try {
 
   await client.query(`
     INSERT INTO "AuditLog" ("id","actorEmail","action","entityType","entityId","payload","createdAt")
-    VALUES ($1,'system','seo.bootstrap.beta2','System','seo-migration-v1',$2::jsonb,NOW())
-  `, [`beta2-seo-audit-${Date.now()}`, JSON.stringify({ routes: routes.length, redirects: redirects.length })]);
+    VALUES ('beta2-seo-bootstrap-audit','system','seo.bootstrap.beta2','System','seo-migration-v1',$1::jsonb,NOW())
+    ON CONFLICT ("id") DO NOTHING
+  `, [JSON.stringify({ routes: routes.length, redirects: redirects.length })]);
+
   await client.query("COMMIT");
   console.log(`[ELSYSTAR] SEO bootstrap ready: ${routes.length} route defaults, ${redirects.length} legacy redirects checked.`);
 } catch (error) {
