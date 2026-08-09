@@ -1,0 +1,35 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
+    volumes:
+      - ..:/workspace:cached
+    working_dir: /workspace
+    command: sleep infinity
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://elsystar:elsystar@db:5432/elsystar?schema=public
+      NEXT_PUBLIC_SITE_URL: http://localhost:6300
+      NEXT_PUBLIC_ADMIN_URL: http://localhost:6301
+      ADMIN_EMAIL: admin@elsystar.local
+      ADMIN_PASSWORD: codespaces-preview-only
+      ADMIN_SESSION_SECRET: codespaces-preview-session-secret-change-for-production
+
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: elsystar
+      POSTGRES_PASSWORD: elsystar
+      POSTGRES_DB: elsystar
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elsystar -d elsystar"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres-data:
