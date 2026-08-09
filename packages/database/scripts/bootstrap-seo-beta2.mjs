@@ -48,6 +48,29 @@ try {
     `, [`beta2-redirect-${fromPath.slice(1).replaceAll(/[^a-z0-9]+/gi, "-")}`, fromPath, toPath]);
   }
 
+  // Verified public facts from the legacy ELSYSTAR pages are used only to fill empty CMS fields.
+  await client.query(`
+    UPDATE "Solution"
+    SET
+      "description" = COALESCE("description", $1),
+      "seoTitle" = COALESCE("seoTitle", $2),
+      "seoDescription" = COALESCE("seoDescription", $3),
+      "updatedAt" = NOW()
+    WHERE "slug" = 'megapolis'
+  `, [
+    "АСУДТ «Мегаполис» — модульная система централизованного управления дорожным движением. Архитектура объединяет серверные и диспетчерские компоненты, мониторинг транспортных потоков, координированное и адаптивное управление. Для интеграции предусмотрены стандартные сетевые интерфейсы и HTTP API.",
+    "АСУДТ «Мегаполис» — система управления дорожным движением ELSYSTAR",
+    "АСУДТ «Мегаполис»: централизованный мониторинг, диспетчеризация, координированное и адаптивное управление дорожным движением, модульная архитектура и API интеграции.",
+  ]);
+
+  const productSeo = [
+    ["uk-4-1m", "Дорожный контроллер УК-4.1М ELSYSTAR", "УК-4.1М — дорожный контроллер ELSYSTAR для локального и сетевого управления транспортными и пешеходными потоками, диагностики и работы в составе АСУДД."],
+    ["uk-2-5", "Дорожный контроллер УК-2.5 ELSYSTAR", "УК-2.5 — компактный дорожный контроллер ELSYSTAR для светофорных объектов, локального и сетевого управления транспортными и пешеходными потоками."],
+  ];
+  for (const [slug, title, description] of productSeo) {
+    await client.query(`UPDATE "Product" SET "seoTitle"=COALESCE("seoTitle",$2), "seoDescription"=COALESCE("seoDescription",$3) WHERE "slug"=$1`, [slug, title, description]);
+  }
+
   await client.query(`
     INSERT INTO "AuditLog" ("id","actorEmail","action","entityType","entityId","payload","createdAt")
     VALUES ($1,'system','seo.bootstrap.beta2','System','seo-migration-v1',$2::jsonb,NOW())
