@@ -1,20 +1,20 @@
-import { AdminRole } from "@elsystar/database";
+import { SESSION_ADMIN_ROLES, SessionAdminRole } from "./session-token";
 
-export const ROLE_LABELS: Record<AdminRole, string> = {
+export const ROLE_LABELS: Record<SessionAdminRole, string> = {
   ADMIN: "Администратор",
   EDITOR: "Редактор",
   SUPPORT: "Поддержка",
   ANALYST: "Аналитик",
 };
 
-const editorRoles = [AdminRole.ADMIN, AdminRole.EDITOR];
-const supportRoles = [AdminRole.ADMIN, AdminRole.SUPPORT];
-const documentRoles = [AdminRole.ADMIN, AdminRole.EDITOR, AdminRole.SUPPORT];
-const analyticsRoles = [AdminRole.ADMIN, AdminRole.ANALYST];
+const editorRoles: SessionAdminRole[] = ["ADMIN", "EDITOR"];
+const supportRoles: SessionAdminRole[] = ["ADMIN", "SUPPORT"];
+const documentRoles: SessionAdminRole[] = ["ADMIN", "EDITOR", "SUPPORT"];
+const analyticsRoles: SessionAdminRole[] = ["ADMIN", "ANALYST"];
 
-export const ADMIN_ROUTE_PERMISSIONS: Array<{ prefix: string; roles: AdminRole[] }> = [
-  { prefix: "/users", roles: [AdminRole.ADMIN] },
-  { prefix: "/audit", roles: [AdminRole.ADMIN] },
+export const ADMIN_ROUTE_PERMISSIONS: Array<{ prefix: string; roles: SessionAdminRole[] }> = [
+  { prefix: "/users", roles: ["ADMIN"] },
+  { prefix: "/audit", roles: ["ADMIN"] },
   { prefix: "/analytics", roles: analyticsRoles },
   { prefix: "/homepage", roles: editorRoles },
   { prefix: "/products", roles: editorRoles },
@@ -29,9 +29,9 @@ export const ADMIN_ROUTE_PERMISSIONS: Array<{ prefix: string; roles: AdminRole[]
 ];
 
 export function rolesForAdminPath(pathname: string) {
-  return ADMIN_ROUTE_PERMISSIONS.find(({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`))?.roles ?? Object.values(AdminRole);
+  return ADMIN_ROUTE_PERMISSIONS.find(({ prefix }) => pathname === prefix || pathname.startsWith(`${prefix}/`))?.roles ?? [...SESSION_ADMIN_ROLES];
 }
 
-export function canAccessAdminPath(role: AdminRole, pathname: string) {
+export function canAccessAdminPath(role: SessionAdminRole, pathname: string) {
   return rolesForAdminPath(pathname).includes(role);
 }
