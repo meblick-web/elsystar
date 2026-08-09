@@ -17,19 +17,10 @@ if (!listenPort || !targetPort || !allowedHost) {
 
 function normalizedHeaders(input) {
   const headers = { ...input };
-  const origin = typeof headers.origin === "string" ? headers.origin : null;
-  if (origin) {
-    try {
-      const originHost = new URL(origin).host;
-      if (originHost === allowedHost) {
-        headers.host = allowedHost;
-        headers["x-forwarded-host"] = allowedHost;
-        headers["x-forwarded-proto"] = "https";
-      }
-    } catch {
-      // Preserve original headers for malformed or non-URL Origin values.
-    }
-  }
+  headers.host = allowedHost;
+  headers["x-forwarded-host"] = allowedHost;
+  headers["x-forwarded-proto"] = "https";
+  headers["x-forwarded-port"] = String(listenPort);
   return headers;
 }
 
@@ -73,5 +64,5 @@ server.on("upgrade", (request, socket, head) => {
 });
 
 server.listen(listenPort, "0.0.0.0", () => {
-  console.log(`[ELSYSTAR] Codespaces proxy ${listenPort} -> ${targetPort}; allowed host ${allowedHost}`);
+  console.log(`[ELSYSTAR] Codespaces proxy ${listenPort} -> ${targetPort}; canonical host ${allowedHost}`);
 });
