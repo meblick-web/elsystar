@@ -16,6 +16,7 @@ import "./alpha9-states.css";
 import "./alpha9_1.css";
 import "./alpha9_1_components.css";
 import "./alpha9_3.css";
+import "./beta3.css";
 
 export const revalidate = 300;
 
@@ -58,12 +59,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="ru">
       <body>
+        <a className="skipLink" href="#main-content">Перейти к содержимому</a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
         <Suspense fallback={null}><AnalyticsTracker /></Suspense>
-        {children}
+        <div id="main-content" className="appContent" tabIndex={-1}>{children}</div>
       </body>
     </html>
   );
