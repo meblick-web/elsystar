@@ -5,6 +5,7 @@ import "./styles.css";
 import "./alpha3.css";
 import "./alpha4.css";
 import "./alpha6.css";
+import "./alpha7.css";
 
 export const dynamic = "force-dynamic";
 
