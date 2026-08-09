@@ -4,7 +4,7 @@
 
 ## Текущий baseline
 
-`v0.1.0-alpha.7.1 — Codespaces Server Actions & Restart Hotfix`
+`v0.1.0-alpha.7.2 — Guarded Prisma Push Hotfix`
 
 ### Реализовано
 
@@ -32,7 +32,8 @@
 - SEO и управляемые 301/302 redirects;
 - GitHub Codespaces-среда: Node.js 22 + PostgreSQL 16 + автоматический запуск web/admin и синхронизация Prisma-схемы;
 - Codespaces reverse-proxy origin разрешён для Next.js Server Actions;
-- preview после `git pull` запускается с чистым `.next` и полным перезапуском процессов.
+- preview после `git pull` запускается с чистым `.next` и полным перезапуском процессов;
+- guarded Prisma push: известное alpha.7 ограничение версий применяется автоматически только после проверки отсутствия дублей.
 
 ## GitHub Codespaces
 
@@ -45,10 +46,12 @@
 3. старые preview-процессы останавливаются;
 4. очищается revision-dependent `.next` state;
 5. генерируется Prisma Client;
-6. синхронизируется development-схема БД;
+6. безопасно синхронизируется development-схема БД;
 7. запускается публичный сайт на `6300`;
 8. запускается админка на `6301`;
 9. оба порта автоматически пробрасываются GitHub Codespaces.
+
+Для известного перехода alpha.7 перед добавлением уникальности `(seriesId, version)` выполняется проверка дублей. При обнаружении дублей schema push останавливается без применения изменений. После успешного создания индекса последующие синхронизации снова выполняются обычным `prisma db push` без автоматического принятия будущих рискованных изменений.
 
 Prisma-команды показывают прогресс непосредственно в терминале и имеют защитный timeout.
 
@@ -101,7 +104,7 @@ npm run typecheck
 npm run build
 ```
 
-CI дополнительно проверяет Docker Compose и shell-скрипты Codespaces.
+CI дополнительно проверяет Docker Compose, shell-скрипты Codespaces и синтаксис guarded Prisma push.
 
 ## Принципы
 
