@@ -10,7 +10,10 @@ import "./alpha9.css";
 import "./alpha9-states.css";
 import "./alpha9_3.css";
 
-export const metadata: Metadata = { title: "ELSYSTAR Admin" };
+export const metadata: Metadata = {
+  title: "ELSYSTAR Admin",
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return <html lang="ru"><body>{children}</body></html>;
