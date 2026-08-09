@@ -22,8 +22,8 @@ export interface PublicProject {
   solutionText: string | null;
   result: string | null;
   coverImageUrl: string | null;
-  isDemo?: boolean;
-  metrics?: Array<{ value: string; label: string }>;
+  isDemo: boolean;
+  metrics: Array<{ value: string; label: string }>;
 }
 
 export const fallbackHomepage = {
@@ -34,12 +34,24 @@ export const fallbackHomepage = {
   primaryCtaHref: "/solutions",
   secondaryCtaLabel: "Каталог продукции",
   secondaryCtaHref: "/products",
+  trust1Value: "30+",
+  trust1Label: "лет инженерного опыта",
+  trust2Value: "Собственное",
+  trust2Label: "производство оборудования",
+  trust3Value: "Комплексно",
+  trust3Label: "от контроллера до АСУДТ",
+  productsEyebrow: "ПРОДУКЦИЯ",
+  productsTitle: "Основные контроллеры",
   solutionsEyebrow: "НАПРАВЛЕНИЯ",
   solutionsTitle: "Всё необходимое для управления движением",
   projectsEyebrow: "ПРОЕКТЫ",
   projectsTitle: "Решения, работающие на реальных объектах",
+  supportEyebrow: "ПОДДЕРЖКА",
   supportTitle: "Документы и помощь — в одном месте",
   supportDescription: "Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.",
+  requestEyebrow: "СВЯЗАТЬСЯ С НАМИ",
+  requestTitle: "Получить коммерческое предложение",
+  requestDescription: "Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.",
 };
 
 const fallbackSolutions: PublicSolution[] = [
@@ -59,9 +71,10 @@ const demoProjects: PublicProject[] = [
     year: 2026,
     challenge: "Смоделировать модернизацию загруженных городских перекрёстков без полной замены существующей инфраструктуры, объединить контроллеры и детекторы в единую систему и дать диспетчеру прозрачный мониторинг состояния объектов.",
     solutionText: "В демонстрационном проекте применены дорожные контроллеры ELSYSTAR, детекторы транспорта, централизованный мониторинг и сценарии адаптивного управления. Объекты объединены в единый контур с журналом событий и удалённой диагностикой.",
-    result: "Расчётный эффект демонстрационного сценария: 42 перекрёстка, 126 контроллеров; снижение средней задержки до 18%, сокращение числа остановок до 14% и более быстрый поиск неисправностей за счёт единого мониторинга.",
+    result: "Расчётный эффект демонстрационного сценария: снижение средней задержки до 18%, сокращение числа остановок до 14% и более быстрый поиск неисправностей за счёт единого мониторинга.",
     coverImageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1400&q=86",
     isDemo: true,
+    metrics: [{ value: "42", label: "перекрёстка" }, { value: "126", label: "контроллеров" }, { value: "−18%", label: "расчётная задержка" }],
   },
   {
     id: "demo-pyatigorsk",
@@ -73,9 +86,10 @@ const demoProjects: PublicProject[] = [
     year: 2026,
     challenge: "Показать работу системы на городе с сезонной нагрузкой, переменной интенсивностью движения и необходимостью поддерживать предсказуемое время проезда по основным коридорам.",
     solutionText: "Сценарий включает координированные планы, сетевое управление контроллерами, сбор данных с детекторов и диспетчерскую панель для контроля режимов и событий.",
-    result: "Модельный результат: 28 перекрёстков, 84 контроллера; до 16% сокращения времени прохождения основного коридора и более стабильное распределение транспортного потока в часы пик.",
+    result: "Модельный результат: до 16% сокращения времени прохождения основного коридора и более стабильное распределение транспортного потока в часы пик.",
     coverImageUrl: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1400&q=86",
     isDemo: true,
+    metrics: [{ value: "28", label: "перекрёстков" }, { value: "84", label: "контроллера" }, { value: "−16%", label: "время в пути" }],
   },
   {
     id: "demo-minvody",
@@ -87,9 +101,10 @@ const demoProjects: PublicProject[] = [
     year: 2026,
     challenge: "Смоделировать работу сети на транспортном узле с резкими пиками нагрузки, транзитным потоком и повышенными требованиями к доступности оборудования.",
     solutionText: "В сценарии используются контроллеры, резервируемые каналы связи, транспортные детекторы и централизованный журнал событий с оперативным контролем состояния каждого объекта.",
-    result: "Расчётный эффект: 24 объекта, 72 контроллера; до 20% снижения пиковых очередей и сокращение времени диагностики оборудования благодаря единому центру мониторинга.",
+    result: "Расчётный эффект: до 20% снижения пиковых очередей и сокращение времени диагностики оборудования благодаря единому центру мониторинга.",
     coverImageUrl: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1400&q=86",
     isDemo: true,
+    metrics: [{ value: "24", label: "объекта" }, { value: "72", label: "контроллера" }, { value: "−20%", label: "пиковые очереди" }],
   },
   {
     id: "demo-krasnodar",
@@ -101,31 +116,54 @@ const demoProjects: PublicProject[] = [
     year: 2026,
     challenge: "Показать архитектуру масштабируемой городской системы, которая объединяет десятки объектов и позволяет постепенно добавлять новые контроллеры, детекторы и подсистемы без остановки действующей сети.",
     solutionText: "Проектная модель объединяет локальные контроллеры, телеметрию, централизованный сервер, операторские рабочие места и единый журнал событий. Архитектура рассчитана на поэтапное расширение.",
-    result: "Демонстрационные KPI: 60+ объектов, 180 контроллеров и мониторинг 24/7; единая наблюдаемость сети, сокращение ручных операций диспетчера и централизованное изменение планов управления.",
+    result: "Демонстрационные KPI: единая наблюдаемость сети, сокращение ручных операций диспетчера и возможность централизованного изменения планов управления.",
     coverImageUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1400&q=86",
     isDemo: true,
+    metrics: [{ value: "60+", label: "объектов" }, { value: "180", label: "контроллеров" }, { value: "24/7", label: "мониторинг" }],
   },
 ];
 
-function decorateProject<T extends PublicProject>(project: T): T {
-  const isDemo = project.slug.startsWith("demo-") || project.title.toLowerCase().startsWith("демо-кейс");
-  if (!isDemo || !project.result) return { ...project, isDemo };
+function normalizeProject(project: {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  city: string | null;
+  region: string | null;
+  year: number | null;
+  challenge: string | null;
+  solutionText: string | null;
+  result: string | null;
+  coverImageUrl: string | null;
+  isDemo: boolean;
+  metric1Value: string | null;
+  metric1Label: string | null;
+  metric2Value: string | null;
+  metric2Label: string | null;
+  metric3Value: string | null;
+  metric3Label: string | null;
+}): PublicProject {
+  const metrics = [
+    [project.metric1Value, project.metric1Label],
+    [project.metric2Value, project.metric2Label],
+    [project.metric3Value, project.metric3Label],
+  ].filter((pair): pair is [string, string] => Boolean(pair[0] && pair[1])).map(([value, label]) => ({ value, label }));
 
-  const metrics: Array<{ value: string; label: string }> = [];
-  const text = project.result;
-  const add = (match: RegExpMatchArray | null, label: string, negative = false) => {
-    if (!match || metrics.length >= 3) return;
-    const raw = match[1];
-    metrics.push({ value: negative && !raw.startsWith("-") && !raw.startsWith("−") ? `−${raw}` : raw, label });
+  return {
+    id: project.id,
+    slug: project.slug,
+    title: project.title,
+    summary: project.summary,
+    city: project.city,
+    region: project.region,
+    year: project.year,
+    challenge: project.challenge,
+    solutionText: project.solutionText,
+    result: project.result,
+    coverImageUrl: project.coverImageUrl,
+    isDemo: project.isDemo,
+    metrics,
   };
-
-  add(text.match(/(\d+\+?)\s+перекр[её]ст/i), "перекрёстков");
-  add(text.match(/(\d+\+?)\s+контроллер/i), "контроллеров");
-  if (metrics.length < 2) add(text.match(/(\d+\+?)\s+объект/i), "объектов");
-  add(text.match(/(?:до\s+)?(\d+%)\s+(?:снижен|сокращен)/i), "расчётный эффект", true);
-  if (metrics.length < 3) add(text.match(/(24\/7).*мониторинг/i), "мониторинг");
-
-  return { ...project, isDemo, metrics: metrics.length ? metrics : undefined };
 }
 
 export async function getHomepageContent() {
@@ -173,25 +211,23 @@ export async function getPublishedProjects(featuredOnly = false) {
       const projects = await prisma.project.findMany({
         where: { status: ContentStatus.PUBLISHED, ...(featuredOnly ? { featured: true } : {}) },
         orderBy: [{ sortOrder: "asc" }, { year: "desc" }, { updatedAt: "desc" }],
-      }) as PublicProject[];
-      return projects.map((project) => decorateProject(project));
+      });
+      return projects.map(normalizeProject);
     } catch (error) {
       console.error("projects_query_failed", error);
     }
   }
-  const fallback = featuredOnly ? demoProjects.slice(0, 3) : demoProjects;
-  return fallback.map((project) => decorateProject(project));
+  return featuredOnly ? demoProjects.slice(0, 3) : demoProjects;
 }
 
 export async function getProjectBySlug(slug: string) {
   if (isDatabaseConfigured() && prisma) {
     try {
-      const project = await prisma.project.findFirst({ where: { slug, status: ContentStatus.PUBLISHED } }) as PublicProject | null;
-      return project ? decorateProject(project) : null;
+      const project = await prisma.project.findFirst({ where: { slug, status: ContentStatus.PUBLISHED } });
+      return project ? normalizeProject(project) : null;
     } catch (error) {
       console.error("project_query_failed", error);
     }
   }
-  const project = demoProjects.find((item) => item.slug === slug) ?? null;
-  return project ? decorateProject(project) : null;
+  return demoProjects.find((item) => item.slug === slug) ?? null;
 }
