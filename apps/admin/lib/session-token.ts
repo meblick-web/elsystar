@@ -1,13 +1,14 @@
-import { AdminRole } from "@elsystar/database";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const LEGACY_ADMIN_COOKIE = "elsystar_admin_session";
 export const SECURE_ADMIN_COOKIE = "__Host-elsystar_admin_session";
 export const SESSION_TTL_SECONDS = 60 * 60 * 8;
+export const SESSION_ADMIN_ROLES = ["ADMIN", "EDITOR", "SUPPORT", "ANALYST"] as const;
+export type SessionAdminRole = (typeof SESSION_ADMIN_ROLES)[number];
 
 export interface SignedAdminSession {
   email: string;
-  role: AdminRole;
+  role: SessionAdminRole;
   userId?: string;
   exp: number;
 }
@@ -24,9 +25,7 @@ export function adminCookieName() {
 function sessionSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET?.trim();
   if (secret && secret.length >= 32) return secret;
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("ADMIN_SESSION_SECRET must contain at least 32 characters in production");
-  }
+  if (process.env.NODE_ENV === "production") throw new Error("ADMIN_SESSION_SECRET must contain at least 32 characters in production");
   return secret || "development-only-session-secret-change-me";
 }
 
@@ -53,7 +52,7 @@ export function verifyAdminSessionToken(token: string): SignedAdminSession | nul
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as SignedAdminSession;
     const now = Math.floor(Date.now() / 1000);
     if (!session.email || !session.role || !session.exp || session.exp <= now) return null;
-    if (!Object.values(AdminRole).includes(session.role)) return null;
+    if (!SESSION_ADMIN_ROLES.includes(session.role)) return null;
     return session;
   } catch {
     return null;
