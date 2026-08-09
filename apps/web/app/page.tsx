@@ -1,13 +1,15 @@
 import { LeadForm } from "../components/lead-form";
 import { getFeaturedProducts } from "../lib/products";
 import { getHomepageContent, getPublishedProjects, getPublishedSolutions } from "../lib/content";
+import { getCorporateContent } from "../lib/corporate";
 
 export default async function Home() {
-  const [products, content, solutions, projects] = await Promise.all([
+  const [products, content, solutions, projects, corporate] = await Promise.all([
     getFeaturedProducts(),
     getHomepageContent(),
     getPublishedSolutions(true),
     getPublishedProjects(true),
+    getCorporateContent(),
   ]);
   const platform = solutions.find((solution) => solution.type === "PLATFORM");
 
@@ -15,7 +17,7 @@ export default async function Home() {
     <main>
       <header className="header shell">
         <a className="logo" href="/">ELSY<span>STAR</span></a>
-        <nav><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/support">Документация</a><a href="#contacts">Контакты</a></nav>
+        <nav><a href="/products">Продукция</a><a href="/solutions">Решения</a><a href="/projects">Проекты</a><a href="/support">Документация</a><a href="/about">О компании</a><a href="/contacts">Контакты</a></nav>
         <div className="actions"><span>RU / EN</span><a className="button small" data-analytics="cta_click" href="#request">Получить КП</a></div>
       </header>
 
@@ -34,6 +36,8 @@ export default async function Home() {
       </section>
 
       <section className="trust shell"><div><strong>30+</strong><span>лет инженерного опыта</span></div><div><strong>Собственное</strong><span>производство оборудования</span></div><div><strong>Комплексно</strong><span>от контроллера до АСУДТ</span></div></section>
+
+      <section className="companyTeaser shell"><div><p className="eyebrow">{corporate.aboutEyebrow}</p><h2>{corporate.aboutTitle}</h2><p>{corporate.aboutLead}</p></div><div className="companyTeaserActions"><a className="textLink" href="/about">О компании →</a><a className="textLink" href="/production">Производство →</a></div></section>
 
       <section id="solutions" className="section shell">
         <div className="sectionHead"><div><p className="eyebrow">{content.solutionsEyebrow}</p><h2>{content.solutionsTitle}</h2></div><a href="/solutions">Все решения →</a></div>
@@ -55,14 +59,14 @@ export default async function Home() {
         <div className="homeProjectGrid">{projects.slice(0, 3).map((project) => <article key={project.id}><span>{[project.city, project.year].filter(Boolean).join(" · ") || "Проект ELSYSTAR"}</span><h3>{project.title}</h3><p>{project.summary}</p><a href={`/projects/${project.slug}`}>Подробнее →</a></article>)}</div>
       </section>}
 
-      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>{content.supportTitle}</h2><p>{content.supportDescription}</p></div><a className="button ghost" data-analytics="cta_click" href="/support">Открыть документацию</a></section>
+      <section id="support" className="support shell"><div><p className="eyebrow">ПОДДЕРЖКА</p><h2>{content.supportTitle}</h2><p>{content.supportDescription}</p></div><div className="heroButtons"><a className="button ghost" data-analytics="cta_click" href="/support">Документация</a><a className="button ghost" href="/faq">FAQ</a></div></section>
 
       <section id="request" className="requestSection shell">
         <div className="requestIntro"><p className="eyebrow">СВЯЗАТЬСЯ С НАМИ</p><h2>Получить коммерческое предложение</h2><p>Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.</p></div>
         <LeadForm />
       </section>
 
-      <footer id="contacts" className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="/solutions">Решения</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="/projects">Проекты</a><a href="#contacts">Контакты</a></div><div><b>Связаться</b><a href="tel:+79674232054">+7 (967) 423-20-54</a><a href="mailto:arkhast@mail.ru">arkhast@mail.ru</a></div></div></footer>
+      <footer className="footer"><div className="shell footerInner"><div><div className="logo light">ELSY<span>STAR</span></div><p>Интеллектуальные решения для управления движением.</p></div><div><b>Продукция</b><a href="/products">Контроллеры</a><a href="/solutions">Решения</a><a href="/support">Документация</a></div><div><b>Компания</b><a href="/about">О компании</a><a href="/production">Производство</a><a href="/projects">Проекты</a><a href="/contacts">Контакты</a></div><div><b>Связаться</b>{corporate.phonePrimary && <a href={`tel:${corporate.phonePrimary.replace(/[^+\d]/g,"")}`}>{corporate.phonePrimary}</a>}{corporate.emailPrimary && <a href={`mailto:${corporate.emailPrimary}`}>{corporate.emailPrimary}</a>}</div></div></footer>
     </main>
   );
 }
