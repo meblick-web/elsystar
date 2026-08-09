@@ -15,6 +15,16 @@
       "label": "ELSYSTAR Admin",
       "protocol": "http",
       "onAutoForward": "notify"
+    },
+    "16300": {
+      "label": "ELSYSTAR Web Internal",
+      "protocol": "http",
+      "onAutoForward": "ignore"
+    },
+    "16301": {
+      "label": "ELSYSTAR Admin Internal",
+      "protocol": "http",
+      "onAutoForward": "ignore"
     }
   },
   "hostRequirements": {
