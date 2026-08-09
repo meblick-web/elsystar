@@ -1,5 +1,6 @@
-import { AnalyticsEventType, isDatabaseConfigured, prisma } from "@elsystar/database";
+import { AnalyticsEventType, consumeRateLimit, isDatabaseConfigured, prisma } from "@elsystar/database";
 import { NextResponse } from "next/server";
+import { requestSecurityKey } from "../../../lib/request-security";
 
 const eventMap = {
   page_view: AnalyticsEventType.PAGE_VIEW,
@@ -38,6 +39,24 @@ function classifySource(referrer: string | null, utmSource: string | null) {
 }
 
 export async function POST(request: Request) {
+  const contentType = request.headers.get("content-type") ?? "";
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (!contentType.toLowerCase().includes("application/json")) return NextResponse.json({ error: "unsupported_media_type" }, { status: 415 });
+  if (contentLength > 12_288) return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+
+  const rate = await consumeRateLimit({
+    scope: "public_analytics",
+    keyHash: requestSecurityKey(request),
+    limit: 300,
+    windowSeconds: 10 * 60,
+  });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { accepted: false, persisted: false, error: "rate_limited" },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
+    );
+  }
+
   let payload: Record<string, unknown>;
   try {
     payload = await request.json();
@@ -46,7 +65,8 @@ export async function POST(request: Request) {
   }
 
   const name = payload.name as EventName | undefined;
-  const path = typeof payload.path === "string" ? payload.path.slice(0, 500) : "/";
+  const rawPath = typeof payload.path === "string" ? payload.path.slice(0, 500) : "/";
+  const path = rawPath.startsWith("/") && !rawPath.startsWith("//") ? rawPath : "/";
   if (!name || !(name in eventMap)) return NextResponse.json({ error: "invalid_event" }, { status: 400 });
 
   const cookie = request.headers.get("cookie");
@@ -56,16 +76,17 @@ export async function POST(request: Request) {
   const sessionId = sessionCookie ?? crypto.randomUUID();
   const referrer = typeof payload.referrer === "string" ? payload.referrer.slice(0, 1000) : null;
   const userAgent = request.headers.get("user-agent") ?? "";
-  const search = typeof payload.search === "string" ? payload.search : "";
+  const search = typeof payload.search === "string" ? payload.search.slice(0, 2000) : "";
   const query = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const utmSource = query.get("utm_source")?.slice(0, 120) ?? null;
   const utmMedium = query.get("utm_medium")?.slice(0, 120) ?? null;
   const utmCampaign = query.get("utm_campaign")?.slice(0, 160) ?? null;
   const source = classifySource(referrer, utmSource);
+  const secureCookie = process.env.NODE_ENV === "production" || process.env.NEXT_PUBLIC_SITE_URL?.startsWith("https://") === true;
 
   const response = NextResponse.json({ accepted: true, persisted: false }, { status: 202 });
-  if (!visitorCookie) response.cookies.set("elsystar_vid", visitorId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365, path: "/" });
-  response.cookies.set("elsystar_sid", sessionId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 30, path: "/" });
+  if (!visitorCookie) response.cookies.set("elsystar_vid", visitorId, { httpOnly: true, sameSite: "lax", secure: secureCookie, maxAge: 60 * 60 * 24 * 365, path: "/" });
+  response.cookies.set("elsystar_sid", sessionId, { httpOnly: true, sameSite: "lax", secure: secureCookie, maxAge: 60 * 30, path: "/" });
 
   if (!isDatabaseConfigured() || !prisma) return response;
 
@@ -76,8 +97,8 @@ export async function POST(request: Request) {
         visitorId,
         sessionId,
         path,
-        productId: typeof payload.productId === "string" ? payload.productId : null,
-        documentId: typeof payload.documentId === "string" ? payload.documentId : null,
+        productId: typeof payload.productId === "string" ? payload.productId.slice(0, 120) : null,
+        documentId: typeof payload.documentId === "string" ? payload.documentId.slice(0, 120) : null,
         referrer,
         source,
         device: detectDevice(userAgent),
