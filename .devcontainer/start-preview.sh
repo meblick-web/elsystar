@@ -6,43 +6,47 @@ mkdir -p .codespaces/logs .codespaces/pids
 
 DOMAIN="${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-app.github.dev}"
 if [ -n "${CODESPACE_NAME:-}" ]; then
-  SITE_URL="https://${CODESPACE_NAME}-6300.${DOMAIN}"
-  ADMIN_URL="https://${CODESPACE_NAME}-6301.${DOMAIN}"
+  SITE_HOST="${CODESPACE_NAME}-6300.${DOMAIN}"
+  ADMIN_HOST="${CODESPACE_NAME}-6301.${DOMAIN}"
+  SITE_URL="https://${SITE_HOST}"
+  ADMIN_URL="https://${ADMIN_HOST}"
 else
-  SITE_URL="http://localhost:6300"
-  ADMIN_URL="http://localhost:6301"
+  SITE_HOST="localhost:6300"
+  ADMIN_HOST="localhost:6301"
+  SITE_URL="http://${SITE_HOST}"
+  ADMIN_URL="http://${ADMIN_HOST}"
 fi
+
+stop_pid_file() {
+  local pid_file="$1"
+  local label="$2"
+  if [ ! -f "$pid_file" ]; then return 0; fi
+  local old_pid
+  old_pid="$(cat "$pid_file" 2>/dev/null || true)"
+  if [ -n "$old_pid" ] && kill -0 "$old_pid" >/dev/null 2>&1; then
+    echo "[ELSYSTAR] Stopping ${label} (pid ${old_pid})..."
+    kill -TERM -- "-${old_pid}" >/dev/null 2>&1 || kill -TERM "$old_pid" >/dev/null 2>&1 || true
+    for _ in $(seq 1 20); do
+      if ! kill -0 "$old_pid" >/dev/null 2>&1; then break; fi
+      sleep 0.25
+    done
+    kill -KILL -- "-${old_pid}" >/dev/null 2>&1 || true
+  fi
+  rm -f "$pid_file"
+}
 
 stop_service() {
   local name="$1"
-  local port="$2"
-  local pid_file=".codespaces/pids/${name}.pid"
+  local public_port="$2"
+  local internal_port="$3"
 
-  if [ -f "$pid_file" ]; then
-    local old_pid
-    old_pid="$(cat "$pid_file" 2>/dev/null || true)"
-    if [ -n "$old_pid" ] && kill -0 "$old_pid" >/dev/null 2>&1; then
-      echo "[ELSYSTAR] Stopping ${name} (pid ${old_pid})..."
-      kill -TERM -- "-${old_pid}" >/dev/null 2>&1 || kill -TERM "$old_pid" >/dev/null 2>&1 || true
-      for _ in $(seq 1 20); do
-        if ! kill -0 "$old_pid" >/dev/null 2>&1; then
-          break
-        fi
-        sleep 0.25
-      done
-      kill -KILL -- "-${old_pid}" >/dev/null 2>&1 || true
-    fi
-    rm -f "$pid_file"
-  fi
+  stop_pid_file ".codespaces/pids/${name}-proxy.pid" "${name} proxy"
+  stop_pid_file ".codespaces/pids/${name}-next.pid" "${name} Next.js"
 
-  # Fallback for processes started by an older preview script that did not
-  # preserve a usable PID file.
-  if curl -fsS "http://127.0.0.1:${port}" >/dev/null 2>&1; then
-    echo "[ELSYSTAR] Stopping stale process on ${port}..."
-    pkill -f "next dev -p ${port}" >/dev/null 2>&1 || true
-    pkill -f "next-server.*${port}" >/dev/null 2>&1 || true
-    sleep 1
-  fi
+  pkill -f "codespaces-next-proxy.mjs --listen ${public_port}" >/dev/null 2>&1 || true
+  pkill -f "next dev -p ${internal_port}" >/dev/null 2>&1 || true
+  pkill -f "next-server.*${internal_port}" >/dev/null 2>&1 || true
+  sleep 0.5
 }
 
 run_step() {
@@ -71,61 +75,70 @@ run_step() {
   echo "[ELSYSTAR] ${label}: done."
 }
 
-start_service() {
-  local name="$1"
-  local port="$2"
-  local workspace="$3"
-  local log_file=".codespaces/logs/${name}.log"
-  local pid_file=".codespaces/pids/${name}.pid"
-
-  if curl -fsS "http://127.0.0.1:${port}" >/dev/null 2>&1; then
-    echo "[ELSYSTAR] Port ${port} is still occupied; refusing to start a mixed-version preview." >&2
-    return 1
-  fi
-
-  : > "$log_file"
-  echo "[ELSYSTAR] Starting ${name} on ${port}..."
-
-  setsid bash -lc "cd /workspace && export NEXT_PUBLIC_SITE_URL='${SITE_URL}' NEXT_PUBLIC_ADMIN_URL='${ADMIN_URL}' && exec npm run dev --workspace='${workspace}' -- --hostname 0.0.0.0" \
-    </dev/null >>"$log_file" 2>&1 &
-  local pid=$!
-  echo "$pid" > "$pid_file"
+wait_for_http() {
+  local url="$1"
+  local pid="$2"
+  local label="$3"
+  local log_file="$4"
 
   for _ in $(seq 1 60); do
-    if curl -fsS "http://127.0.0.1:${port}" >/dev/null 2>&1; then
-      echo "[ELSYSTAR] ${name} is ready on ${port} (pid ${pid})."
-      return 0
-    fi
-
+    if curl -fsS "$url" >/dev/null 2>&1; then return 0; fi
     if ! kill -0 "$pid" >/dev/null 2>&1; then
-      echo "[ELSYSTAR] ${name} exited before becoming ready." >&2
+      echo "[ELSYSTAR] ${label} exited before becoming ready." >&2
       echo "----- ${log_file} -----" >&2
-      tail -n 100 "$log_file" >&2 || true
+      tail -n 120 "$log_file" >&2 || true
       return 1
     fi
-
     sleep 2
   done
 
-  echo "[ELSYSTAR] ${name} did not become ready on ${port}." >&2
+  echo "[ELSYSTAR] ${label} did not become ready." >&2
   echo "----- ${log_file} -----" >&2
-  tail -n 100 "$log_file" >&2 || true
+  tail -n 120 "$log_file" >&2 || true
   return 1
 }
 
-echo "[ELSYSTAR] Restarting preview on the current repository revision..."
-stop_service "web" 6300
-stop_service "admin" 6301
+start_service() {
+  local name="$1"
+  local public_port="$2"
+  local internal_port="$3"
+  local app_dir="$4"
+  local allowed_host="$5"
+  local next_log=".codespaces/logs/${name}.log"
+  local proxy_log=".codespaces/logs/${name}-proxy.log"
 
-# Server Action manifests and Turbopack state are tied to a particular source
-# revision. Remove them before starting a preview after git pull.
+  : > "$next_log"
+  : > "$proxy_log"
+  echo "[ELSYSTAR] Starting ${name} Next.js on internal port ${internal_port}..."
+
+  setsid bash -lc "cd '/workspace/${app_dir}' && export NEXT_PUBLIC_SITE_URL='${SITE_URL}' NEXT_PUBLIC_ADMIN_URL='${ADMIN_URL}' && exec ../../node_modules/.bin/next dev -p '${internal_port}' --hostname 127.0.0.1" \
+    </dev/null >>"$next_log" 2>&1 &
+  local next_pid=$!
+  echo "$next_pid" > ".codespaces/pids/${name}-next.pid"
+  wait_for_http "http://127.0.0.1:${internal_port}" "$next_pid" "${name} Next.js" "$next_log"
+
+  echo "[ELSYSTAR] Starting ${name} proxy on public port ${public_port}..."
+  setsid node .devcontainer/codespaces-next-proxy.mjs --listen "$public_port" --target "$internal_port" --allowed-host "$allowed_host" \
+    </dev/null >>"$proxy_log" 2>&1 &
+  local proxy_pid=$!
+  echo "$proxy_pid" > ".codespaces/pids/${name}-proxy.pid"
+  wait_for_http "http://127.0.0.1:${public_port}" "$proxy_pid" "${name} proxy" "$proxy_log"
+
+  echo "[ELSYSTAR] ${name} is ready on ${public_port} (Next ${next_pid}, proxy ${proxy_pid})."
+}
+
+echo "[ELSYSTAR] Restarting preview on the current repository revision..."
+stop_service "web" 6300 16300
+stop_service "admin" 6301 16301
+
+# Server Action manifests and Turbopack state are tied to a particular source revision.
 rm -rf apps/web/.next apps/admin/.next
 
 run_step "Generating Prisma client" 180 .codespaces/logs/prisma-generate.log npm run db:generate
 run_step "Synchronizing development database schema" 180 .codespaces/logs/db-push.log node packages/database/scripts/codespaces-safe-push.mjs
 
-start_service "web" 6300 "@elsystar/web"
-start_service "admin" 6301 "@elsystar/admin"
+start_service "web" 6300 16300 "apps/web" "$SITE_HOST"
+start_service "admin" 6301 16301 "apps/admin" "$ADMIN_HOST"
 
 echo "[ELSYSTAR] Preview is ready."
 echo "[ELSYSTAR] Public site: ${SITE_URL}"
