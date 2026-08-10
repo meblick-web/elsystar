@@ -21,9 +21,12 @@ for (const file of [
   "apps/web/lib/i18n.ts",
   "apps/web/components/language-switch.tsx",
   "apps/admin/app/localization/page.tsx",
+  "apps/admin/app/content-qa/page.tsx",
   "packages/database/scripts/bootstrap-localization-beta4.mjs",
+  "packages/database/scripts/bootstrap-content-beta5.mjs",
   "scripts/production-db-init.mjs",
   "scripts/smoke-production.sh",
+  "docs/CONTENT-SOURCES.md",
   "docs/RELEASE-CHECKLIST.md",
 ]) {
   if (!fs.existsSync(file)) errors.push(`required release file is missing: ${file}`);
@@ -31,6 +34,14 @@ for (const file of [
 
 const schema = fs.readFileSync("packages/database/prisma/schema.prisma", "utf8");
 if (!schema.includes("model ContentTranslation")) errors.push("ContentTranslation model is required for RU/EN localization");
+
+const beta5Bootstrap = fs.readFileSync("packages/database/scripts/bootstrap-content-beta5.mjs", "utf8");
+for (const requiredSource of ["elsystar.com/production.html", "elsystar.com/software.html", "elsystar.com/support.html", "elsystar.com/price.html"]) {
+  if (!beta5Bootstrap.includes(requiredSource)) errors.push(`beta5 bootstrap is missing verified source reference: ${requiredSource}`);
+}
+if (/images\.unsplash\.com/.test(beta5Bootstrap) && !beta5Bootstrap.includes("temporary")) {
+  warnings.push("beta5 bootstrap still references Unsplash; verify it is only used to identify/replace an old temporary row.");
+}
 
 const webPackage = JSON.parse(fs.readFileSync("apps/web/package.json", "utf8"));
 const adminPackage = JSON.parse(fs.readFileSync("apps/admin/package.json", "utf8"));
