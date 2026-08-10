@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const roots = ["apps/web/app", "apps/web/components"];
-const validTopLevel = new Set(["", "products", "solutions", "projects", "support", "about", "production", "contacts", "faq", "api", "sitemap.xml", "robots.txt"]);
+const validTopLevel = new Set(["", "en", "products", "solutions", "projects", "support", "about", "production", "contacts", "faq", "api", "sitemap.xml", "robots.txt"]);
 const problems = [];
 
 function walk(directory) {
