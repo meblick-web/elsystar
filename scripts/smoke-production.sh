@@ -42,7 +42,7 @@ ADMIN_PID=$!
 wait_for "http://127.0.0.1:${WEB_PORT}/api/health" "public app" "$LOG_DIR/web.log"
 wait_for "http://127.0.0.1:${ADMIN_PORT}/api/health" "admin app" "$LOG_DIR/admin.log"
 
-for path in / /products /solutions /projects /support /about /production /contacts /faq /robots.txt /sitemap.xml /api/health; do
+for path in / /products /solutions /projects /support /about /production /contacts /faq /robots.txt /sitemap.xml /api/health /en /en/products /en/products/uk-4-1m /en/solutions /en/projects /en/support /en/about /en/production /en/contacts /en/faq; do
   curl -fsS "http://127.0.0.1:${WEB_PORT}${path}" >/dev/null
   echo "[ELSYSTAR SMOKE] public ${path}: OK"
 done
@@ -52,4 +52,4 @@ for path in /login /robots.txt /api/health; do
   echo "[ELSYSTAR SMOKE] admin ${path}: OK"
 done
 
-echo "[ELSYSTAR SMOKE] Production runtime smoke test passed."
+echo "[ELSYSTAR SMOKE] Production runtime smoke test passed for RU and EN routes."

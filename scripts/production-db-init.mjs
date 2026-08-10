@@ -50,6 +50,7 @@ run("Creating schema in clean production database", "npm", ["run", "db:push"]);
 run("Importing verified visible content", "node", ["packages/database/scripts/bootstrap-visible-content.mjs"]);
 run("Applying CMS QA content migration", "node", ["packages/database/scripts/bootstrap-content-qa-alpha9-3.mjs"]);
 run("Applying SEO defaults and legacy redirects", "node", ["packages/database/scripts/bootstrap-seo-beta2.mjs"]);
+run("Applying English localization defaults", "node", ["packages/database/scripts/bootstrap-localization-beta4.mjs"]);
 
 console.log("[ELSYSTAR] Clean production database initialization completed.");
 console.log("[ELSYSTAR] Future schema changes must use a reviewed migration strategy; do not rerun this initializer on an existing database.");

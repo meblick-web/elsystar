@@ -11,6 +11,21 @@ type EntityMetadataInput = {
   type?: "website" | "article";
 };
 
+function englishPath(path: string) {
+  return path === "/" ? "/en" : `/en${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function localeAlternates(path: string, canonical: string) {
+  return {
+    canonical,
+    languages: {
+      "ru-RU": absoluteSiteUrl(path),
+      en: absoluteSiteUrl(englishPath(path)),
+      "x-default": absoluteSiteUrl(path),
+    },
+  };
+}
+
 function socialMetadata({ path, title, description, image, index = true, type = "website" }: EntityMetadataInput): Metadata {
   const canonical = absoluteSiteUrl(path);
   const canIndex = searchIndexingEnabled() && index;
@@ -19,11 +34,12 @@ function socialMetadata({ path, title, description, image, index = true, type = 
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: localeAlternates(path, canonical),
     robots: { index: canIndex, follow: canIndex },
     openGraph: {
       type,
       locale: "ru_RU",
+      alternateLocale: ["en_US"],
       siteName: SITE_NAME,
       url: canonical,
       title,
@@ -66,11 +82,12 @@ export async function resolveSeoMetadata(path: string, fallback: Metadata): Prom
     ...fallback,
     title,
     description,
-    alternates: { ...fallback.alternates, canonical },
+    alternates: { ...fallback.alternates, ...localeAlternates(path, canonical) },
     robots: { index: canIndex, follow: canFollow },
     openGraph: {
       type: "website",
       locale: "ru_RU",
+      alternateLocale: ["en_US"],
       siteName: SITE_NAME,
       url: canonical,
       title,

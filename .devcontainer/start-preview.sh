@@ -21,7 +21,7 @@ print_diagnostics() {
   set +e
   echo "[ELSYSTAR] ----- preview diagnostics -----" >&2
   if command -v ss >/dev/null 2>&1; then
-    ss -ltnp 2>/dev/null | grep -E ':(6300|6301|16300|16301)\\b' >&2 || true
+    ss -ltnp 2>/dev/null | grep -E ':(6300|6301|16300|16301)\b' >&2 || true
   fi
   for port in 6300 6301 16300 16301; do
     local code
@@ -226,6 +226,9 @@ if wait_for_database 60; then
     if ! run_step "Synchronizing beta2 SEO defaults and redirects" 120 .codespaces/logs/seo-bootstrap.log node packages/database/scripts/bootstrap-seo-beta2.mjs; then
       echo "[ELSYSTAR] WARNING: SEO bootstrap failed; preview will still start." >&2
     fi
+    if ! run_step "Synchronizing beta4 English localization" 120 .codespaces/logs/localization-bootstrap.log node packages/database/scripts/bootstrap-localization-beta4.mjs; then
+      echo "[ELSYSTAR] WARNING: localization bootstrap failed; RU preview will still start." >&2
+    fi
   else
     echo "[ELSYSTAR] WARNING: database schema sync failed; preview processes will still be started for diagnostics/recovery." >&2
   fi
@@ -258,5 +261,6 @@ fi
 echo "[ELSYSTAR] Preview startup completed."
 echo "[ELSYSTAR] Public site: ${SITE_URL} — $([ "$web_ok" = true ] && echo READY || echo FAILED)"
 echo "[ELSYSTAR] Admin:       ${ADMIN_URL} — $([ "$admin_ok" = true ] && echo READY || echo FAILED)"
+echo "[ELSYSTAR] English:     ${SITE_URL}/en"
 echo "[ELSYSTAR] Search indexing is disabled for preview environments."
 print_diagnostics
