@@ -17,12 +17,20 @@ for (const file of [
   "apps/web/app/robots.ts",
   "apps/admin/app/robots.ts",
   "apps/web/app/sitemap.ts",
+  "apps/web/app/en/[[...path]]/page.tsx",
+  "apps/web/lib/i18n.ts",
+  "apps/web/components/language-switch.tsx",
+  "apps/admin/app/localization/page.tsx",
+  "packages/database/scripts/bootstrap-localization-beta4.mjs",
   "scripts/production-db-init.mjs",
   "scripts/smoke-production.sh",
   "docs/RELEASE-CHECKLIST.md",
 ]) {
   if (!fs.existsSync(file)) errors.push(`required release file is missing: ${file}`);
 }
+
+const schema = fs.readFileSync("packages/database/prisma/schema.prisma", "utf8");
+if (!schema.includes("model ContentTranslation")) errors.push("ContentTranslation model is required for RU/EN localization");
 
 const webPackage = JSON.parse(fs.readFileSync("apps/web/package.json", "utf8"));
 const adminPackage = JSON.parse(fs.readFileSync("apps/admin/package.json", "utf8"));
@@ -44,11 +52,10 @@ const publicFiles = walk("apps/web");
 for (const file of publicFiles) {
   const source = fs.readFileSync(file, "utf8");
   if (source.includes("codespaces-preview-only")) errors.push(`preview credential leaked into public source: ${file}`);
-  if (source.includes("RU / EN")) warnings.push(`inactive RU / EN label remains in ${file}; English locale is not implemented yet`);
 }
 
 if (!fs.existsSync("packages/database/prisma/migrations")) {
-  warnings.push("Prisma migration history is not present. beta.3 supports only guarded initialization of a CLEAN first production database.");
+  warnings.push("Prisma migration history is not present. The current release supports guarded initialization of a CLEAN first production database; later schema changes require a reviewed migration path.");
 }
 
 for (const warning of warnings) console.warn(`[ELSYSTAR RELEASE] WARNING: ${warning}`);
