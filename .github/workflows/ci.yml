@@ -8,6 +8,20 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_USER: elsystar
+          POSTGRES_PASSWORD: elsystar
+          POSTGRES_DB: elsystar_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U elsystar -d elsystar_ci"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,6 +32,18 @@ jobs:
       - run: npm run security:check
       - run: npm run seo:check
       - run: npm run db:generate
+      - name: Validate beta5 CMS bootstrap on PostgreSQL
+        env:
+          DATABASE_URL: postgresql://elsystar:elsystar@127.0.0.1:5432/elsystar_ci?schema=public
+        run: |
+          npm run db:push
+          node packages/database/scripts/bootstrap-visible-content.mjs
+          node packages/database/scripts/bootstrap-content-qa-alpha9-3.mjs
+          node packages/database/scripts/bootstrap-seo-beta2.mjs
+          node packages/database/scripts/bootstrap-localization-beta4.mjs
+          node packages/database/scripts/bootstrap-content-beta5.mjs
+          node packages/database/scripts/bootstrap-content-beta5.mjs
+          node scripts/verify-content-beta5.mjs
       - run: npm run release:check
       - run: npm run typecheck
       - run: npm run build
@@ -29,6 +55,7 @@ jobs:
           node --check scripts/check-internal-links.mjs
           node --check scripts/release-preflight.mjs
           node --check scripts/production-db-init.mjs
+          node --check scripts/verify-content-beta5.mjs
           bash -n scripts/smoke-production.sh
           bash -n scripts/backup-postgres.sh
           bash -n scripts/restore-postgres.sh
