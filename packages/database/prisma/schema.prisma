@@ -118,7 +118,7 @@ model HomepageContent {
   supportDescription String   @default("Быстрый доступ к руководствам, сертификатам, ПО и актуальным версиям материалов.")
   requestEyebrow     String   @default("СВЯЗАТЬСЯ С НАМИ")
   requestTitle       String   @default("Получить коммерческое предложение")
-  requestDescription String  @default("Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.")
+  requestDescription String   @default("Оставьте задачу и контакты. Обращение попадёт в панель управления вместе с источником перехода и страницей, с которой оно было отправлено.")
   updatedAt          DateTime @updatedAt
 }
 
@@ -525,4 +525,19 @@ model SecurityRateLimit {
   @@unique([scope, keyHash, windowStart])
   @@index([expiresAt])
   @@index([scope, expiresAt])
+}
+
+model ContentTranslation {
+  id         String   @id @default(cuid())
+  locale     String
+  entityType String
+  entityId   String
+  field      String
+  value      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([locale, entityType, entityId, field])
+  @@index([locale, entityType, entityId])
+  @@index([entityType, entityId])
 }
