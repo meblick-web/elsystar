@@ -22,6 +22,7 @@ export const ADMIN_ROUTE_PERMISSIONS: Array<{ prefix: string; roles: SessionAdmi
   { prefix: "/projects", roles: editorRoles },
   { prefix: "/corporate", roles: editorRoles },
   { prefix: "/content-qa", roles: editorRoles },
+  { prefix: "/localization", roles: editorRoles },
   { prefix: "/media", roles: editorRoles },
   { prefix: "/seo", roles: editorRoles },
   { prefix: "/documents", roles: documentRoles },
