@@ -31,8 +31,8 @@ export interface PublicProductCategory {
 const fallbackProducts: PublicProduct[] = [
   {
     id: "fallback-uk-4-1m", slug: "uk-4-1m", model: "УК-4.1М", name: "Дорожный контроллер УК-4.1М",
-    shortDescription: "Универсальный дорожный контроллер для локального и сетевого управления регулируемыми перекрёстками.",
-    description: "Контроллер предназначен для управления транспортными и пешеходными потоками и может работать как автономно, так и в составе АСУДТ.",
+    shortDescription: "Дорожный контроллер для локального и сетевого управления транспортными и пешеходными потоками на регулируемых перекрёстках.",
+    description: "УК-4.1М поддерживает фиксированные, координированные, ручные и адаптивные сценарии управления, диагностику силовых цепей и работу в составе АСУДТ «Мегаполис».",
     category: { id: "fallback-controllers", slug: "road-controllers", name: "Дорожные контроллеры", parent: null },
     specifications: [
       { id: "uk41-phases", label: "Число фаз движения", value: "16", unit: null },
@@ -41,29 +41,48 @@ const fallbackProducts: PublicProduct[] = [
       { id: "uk41-channels", label: "Силовые каналы", value: "32", unit: null },
       { id: "uk41-current", label: "Максимальный ток канала", value: "5", unit: "А" },
       { id: "uk41-interfaces", label: "Интерфейсы", value: "RS-232, RS-485", unit: null },
+      { id: "uk41-phase-max", label: "Максимальная длительность фазы", value: "128", unit: "с" },
+      { id: "uk41-tvp", label: "Подключаемые табло вызова пешехода", value: "4", unit: null },
     ],
     features: [
       { id: "uk41-feature-network", title: "Локальная и сетевая работа", description: "Работа автономно или в составе централизованной системы управления." },
       { id: "uk41-feature-diagnostics", title: "Диагностика", description: "Контроль состояния, конфликтов и ведение электронного журнала." },
       { id: "uk41-feature-comms", title: "Гибкая связь", description: "Поддержка проводных, радиоканальных и GPRS-сценариев связи." },
+      { id: "uk41-feature-modes", title: "Набор режимов управления", description: "Фиксированные программы, ручное, координированное, гибкое регулирование с детекторами и аварийные режимы." },
     ],
-    configurations: [], mediaAssets: [], documents: [], solutions: [], projects: [], relatedProducts: [],
+    configurations: [
+      { id: "uk41-config-32am", name: "УК-4.1-32-А-М", sku: "УК-4.1-32-А-М", description: "4 блока ключей по 8 каналов, блок процессора, сетевой адаптер с модемом и блок питания." },
+      { id: "uk41-config-24am", name: "УК-4.1-24-А-М", sku: "УК-4.1-24-А-М", description: "3 блока ключей по 8 каналов, блок процессора, сетевой адаптер с модемом и блок питания." },
+      { id: "uk41-config-16am", name: "УК-4.1-16-А-М", sku: "УК-4.1-16-А-М", description: "2 блока ключей по 8 каналов, блок процессора, сетевой адаптер с модемом и блок питания." },
+      { id: "uk41-config-32", name: "УК-4.1-32", sku: "УК-4.1-32", description: "4 блока ключей по 8 каналов, блок процессора и блок питания." },
+      { id: "uk41-config-24", name: "УК-4.1-24", sku: "УК-4.1-24", description: "3 блока ключей по 8 каналов, блок процессора и блок питания." },
+      { id: "uk41-config-16", name: "УК-4.1-16", sku: "УК-4.1-16", description: "Базовый комплект: 2 блока ключей по 8 каналов, блок процессора и блок питания." },
+    ],
+    mediaAssets: [{ id: "fallback-uk41-image", title: "Дорожный контроллер УК-4.1М", alt: "Дорожный контроллер УК-4.1М ELSYSTAR", url: "https://www.elsystar.com/img/uk4_1m.jpg", isPrimary: true }],
+    documents: [], solutions: [], projects: [], relatedProducts: [],
   },
   {
     id: "fallback-uk-2-5", slug: "uk-2-5", model: "УК-2.5", name: "Дорожный контроллер УК-2.5",
-    shortDescription: "Компактный контроллер для локального и сетевого управления транспортными потоками и пешеходами.",
-    description: "Модель предназначена для светофорных объектов меньшей сложности и совместима с ранее применявшимися решениями семейства УК-2.",
+    shortDescription: "Контроллер для локального и сетевого управления транспортными потоками и пешеходами на регулируемых перекрёстках.",
+    description: "УК-2.5 рассчитан на объекты до 8 направлений и 4 фаз, поддерживает локальные, ручные и координированные режимы и конструктивно совместим с семейством УК-2.",
     category: { id: "fallback-controllers", slug: "road-controllers", name: "Дорожные контроллеры", parent: null },
     specifications: [
       { id: "uk25-phases", label: "Число фаз", value: "до 4", unit: null },
       { id: "uk25-directions", label: "Число направлений", value: "до 8", unit: null },
       { id: "uk25-channels", label: "Силовые каналы", value: "16", unit: null },
+      { id: "uk25-current", label: "Максимальный ток канала", value: "3,5", unit: "А" },
+      { id: "uk25-phase-max", label: "Максимальная длительность фазы", value: "63", unit: "с" },
+      { id: "uk25-size", label: "Габаритные размеры", value: "325 × 530 × 545", unit: "мм" },
+      { id: "uk25-weight", label: "Масса", value: "до 30", unit: "кг" },
     ],
     features: [
       { id: "uk25-feature-compact", title: "Для объектов меньшей сложности", description: "Рациональная конфигурация для перекрёстков с меньшим числом направлений и фаз." },
       { id: "uk25-feature-network", title: "Сетевая интеграция", description: "Поддерживает использование в составе общей системы управления." },
+      { id: "uk25-feature-green-wave", title: "Координированное управление", description: "Поддерживается режим координированного управления «Зелёная волна»." },
     ],
-    configurations: [], mediaAssets: [], documents: [], solutions: [], projects: [], relatedProducts: [],
+    configurations: [{ id: "uk25-config-16", name: "УК-2.5-16", sku: "УК-2.5-16", description: "Полная комплектация: 2 блока ключей по 8 каналов, блок процессора и блок питания." }],
+    mediaAssets: [{ id: "fallback-uk25-image", title: "Дорожный контроллер УК-2.5", alt: "Дорожный контроллер УК-2.5 ELSYSTAR", url: "https://www.elsystar.com/img/uk_2.5.jpg", isPrimary: true }],
+    documents: [], solutions: [], projects: [], relatedProducts: [],
   },
 ];
 

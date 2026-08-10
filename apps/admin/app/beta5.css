@@ -1,0 +1,8 @@
+/* v0.2.0-beta.5 — content/catalog QA */
+.contentQaList>a[data-severity="error"]{border-left:4px solid #9a3f35}
+.contentQaList>a[data-severity="warning"]{border-left:4px solid #b38a38}
+.contentQaList>a[data-severity="error"] .qaType{background:#f8ecea;color:#82352d}
+.contentQaList>a[data-severity="warning"] .qaType{background:#f8f3e7;color:#755f2d}
+.qa-locale{background:#edf1f7;color:#405d7a}
+.contentQaSummary article:first-child strong{color:#8b3c34}
+.contentQaSummary article:nth-child(2) strong{color:#8a6b2b}

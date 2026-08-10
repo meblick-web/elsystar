@@ -1,10 +1,10 @@
 # ELSYSTAR Platform
 
-Новая web-платформа ELSYSTAR: публичный сайт, отдельная административная панель, каталог продукции, решения, проекты, корпоративный контент, документация, обращения, медиатека, SEO и собственная продуктовая аналитика.
+Новая web-платформа ELSYSTAR: публичный RU/EN сайт, отдельная административная панель, каталог продукции, решения, проекты, корпоративный контент, документация/ПО, обращения, медиатека, SEO и продуктовая аналитика.
 
 ## Текущий baseline
 
-`v0.2.0-beta.2 — SEO, Migration & Internet Visibility`
+`v0.2.0-beta.5 — Content, Media & Catalog Completion`
 
 ## Реализовано
 
@@ -13,10 +13,22 @@
 - responsive public/admin UI, loading/error/404 и `prefers-reduced-motion`;
 - PostgreSQL/CMS — источник истины для редакторского контента;
 - CMS главной, продукции, решений, проектов, компании, FAQ, документации и медиатеки;
+- русский контур `/...` и английский `/en/...` с отдельными редактируемыми `ContentTranslation`;
+- `/localization` для EN-редактирования без дублирования продуктовых сущностей;
 - explicit demo-project flag и редактируемые KPI;
-- `/content-qa` для пробелов в изображениях, описаниях, KPI, документации и корпоративных данных;
+- `/content-qa` с разделением критичных пробелов и предупреждений;
 - иерархические категории, характеристики, преимущества, комплектации и product relations;
 - Documentation & Software Center с сериями, текущими/архивными версиями, release notes и SHA-256.
+
+### Verified catalog content
+- УК-4.1М и УК-2.5 с проверенными публичными характеристиками и вариантами комплектации;
+- отдельные позиции модулей УК-4.1, инженерных пультов и периферии;
+- связи контроллеров с комплектующими/совместимым оборудованием;
+- решения: управление перекрёстками, АСУДТ «Мегаполис», модернизация, координация / «Зелёная волна», адаптивное управление, диспетчеризация и мониторинг;
+- открытые legacy-руководства, ПО и материалы старого центра поддержки перенесены в CMS как документные серии;
+- точечные bootstrap stock-фото контроллеров/решений заменяются официальными ELSYSTAR media URL без перезаписи редакторских изображений;
+- источники и правила миграции зафиксированы в `docs/CONTENT-SOURCES.md`;
+- цены, неподтверждённые реквизиты, клиенты и фиктивные реальные кейсы автоматически не создаются.
 
 ### Analytics / Admin
 - посетители, сессии, просмотры, источники, устройства, товары, скачивания, заявки и конверсия;
@@ -35,29 +47,25 @@
 - public/admin `/api/health`;
 - PostgreSQL custom-format backup + SHA-256 и guarded restore;
 - production security preflight `npm run security:check`;
+- production runtime smoke-test RU/EN;
 - runbook `docs/OPERATIONS.md`.
 
 ### SEO / Migration / Visibility
 - единый canonical origin;
 - DB-overridable title/description/canonical/index/follow;
 - OpenGraph + Twitter metadata;
-- общий динамический OpenGraph image;
+- RU/EN/x-default hreflang;
 - Google/Yandex verification meta через environment;
 - `/robots.txt` и CMS-driven `/sitemap.xml`;
-- Codespaces/preview закрыты от индексации независимо от robots CMS;
+- Codespaces/preview закрыты от индексации независимо от CMS;
 - admin всегда `noindex,nofollow` + `Disallow: /`;
 - sitemap включает опубликованные товары, решения, реальные проекты и актуальную публичную документацию;
-- demo-проекты всегда `noindex` и исключены из sitemap;
-- Organization + WebSite JSON-LD;
-- Product JSON-LD без выдуманных цен/Offer/reviews;
-- Service JSON-LD для решений;
-- Article JSON-LD только для реальных проектов;
-- legacy 301 bootstrap для старых `.html` URL;
-- SEO readiness dashboard в админке;
+- EN dynamic pages попадают в sitemap только при наличии явного перевода primary name/title;
+- demo-проекты `noindex` и не используются как реальные внедрения;
+- Organization + WebSite + Product + Service + real-project Article JSON-LD без выдуманных Offer/reviews;
+- legacy 301 bootstrap старых `.html` URL;
 - `npm run seo:check` и hard-coded internal link validation;
-- public ISR/revalidate вместо глобального force-dynamic;
-- `X-Powered-By` отключён, compression включён;
-- launch runbook `docs/SEO-LAUNCH.md`.
+- public ISR/revalidate вместо глобального `force-dynamic`.
 
 ## GitHub Codespaces
 
@@ -72,10 +80,12 @@ Codespaces поднимает Node.js 22 + PostgreSQL 16 и запускает:
 1. генерируется Prisma Client;
 2. синхронизируется development DB schema;
 3. импортируется отсутствующий visible content;
-4. выполняются content migrations;
-5. применяются beta2 SEO defaults и legacy redirects;
-6. public/admin перезапускаются на текущей revision;
-7. search indexing принудительно остаётся выключенным для preview.
+4. выполняются content/QA migrations;
+5. применяются SEO defaults и legacy redirects;
+6. синхронизируется EN localization;
+7. один раз применяется beta5 verified catalog/content bootstrap;
+8. public/admin перезапускаются на текущей revision;
+9. search indexing принудительно остаётся выключенным для preview.
 
 Обновление текущего Codespace:
 
@@ -87,12 +97,12 @@ git pull && bash .devcontainer/start-preview.sh
 
 - `apps/web` — публичный Next.js сайт;
 - `apps/admin` — отдельная Next.js админка;
-- `packages/database` — Prisma/PostgreSQL, rate-limit storage, content/SEO bootstrap scripts;
+- `packages/database` — Prisma/PostgreSQL, rate-limit storage, content/SEO/localization bootstrap scripts;
 - `packages/analytics` — контракты аналитики;
 - `packages/shared` — общие типы;
 - `.devcontainer` — Codespaces environment;
-- `scripts` — security/SEO preflight, link checks, backup/restore;
-- `docs` — architecture/runbooks/release notes.
+- `scripts` — security/SEO/release preflight, smoke, backup/restore;
+- `docs` — architecture, source provenance, runbooks и release notes.
 
 ## Локальный запуск
 
@@ -110,18 +120,16 @@ npm run dev:admin
 
 Для persistence нужен PostgreSQL и `DATABASE_URL`.
 
-## Команды
+## Основные проверки
 
 ```bash
 npm run db:generate
-npm run db:push
-npm run db:migrate
-npm run db:backup
-npm run seo:bootstrap
 npm run security:check
 npm run seo:check
+npm run release:check
 npm run typecheck
 npm run build
+npm run smoke:production
 ```
 
 Restore требует явного подтверждения:
@@ -141,28 +149,14 @@ SEO_INDEXING_ENABLED=true
 
 Google Search Console / Yandex Webmaster и submission sitemap выполняются после production deployment. Подробный порядок: `docs/SEO-LAUNCH.md`.
 
-## CI
-
-CI выполняет:
-
-```text
-npm install
-→ production dependency audit
-→ security preflight
-→ SEO preflight + internal link check
-→ Prisma generate
-→ TypeScript
-→ public/admin production build
-→ security/operations script validation
-→ Codespaces/bootstrap validation
-```
-
 ## Принципы
 
-- CMS является единственным источником редакторского контента при подключённой БД;
+- CMS является источником редакторского контента при подключённой БД;
+- перевод не создаёт второй продукт/проект — локализуются только строки;
 - декоративные дорожные схемы — design system, а не CMS-content;
 - demo-контент всегда явно маркируется и не индексируется как реальное внедрение;
-- непроверенные корпоративные факты, цены, рейтинги и отзывы не публикуются автоматически;
+- цены и неподтверждённые корпоративные факты не публикуются автоматически;
+- legacy-документ в открытом архиве не означает автоматически, что он является действующей нормативной/технической редакцией;
 - binary storage не привязан к провайдеру до production hosting;
 - права проверяются сервером;
 - preview не должен попадать в поисковый индекс;
