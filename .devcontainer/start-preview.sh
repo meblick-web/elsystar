@@ -229,6 +229,9 @@ if wait_for_database 60; then
     if ! run_step "Synchronizing beta4 English localization" 120 .codespaces/logs/localization-bootstrap.log node packages/database/scripts/bootstrap-localization-beta4.mjs; then
       echo "[ELSYSTAR] WARNING: localization bootstrap failed; RU preview will still start." >&2
     fi
+    if ! run_step "Synchronizing beta5 verified catalog content" 180 .codespaces/logs/content-beta5-bootstrap.log node packages/database/scripts/bootstrap-content-beta5.mjs; then
+      echo "[ELSYSTAR] WARNING: beta5 catalog bootstrap failed; preview will still start with existing CMS data." >&2
+    fi
   else
     echo "[ELSYSTAR] WARNING: database schema sync failed; preview processes will still be started for diagnostics/recovery." >&2
   fi
