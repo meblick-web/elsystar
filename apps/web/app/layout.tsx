@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { isDatabaseConfigured, prisma } from "@elsystar/database";
 import { Suspense } from "react";
 import { AnalyticsTracker } from "../components/analytics-tracker";
+import { LanguageSwitch } from "../components/language-switch";
 import { resolveSeoMetadata } from "../lib/seo";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, siteOrigin } from "../lib/site";
 import { organizationJsonLd, websiteJsonLd } from "../lib/structured-data";
@@ -17,6 +18,7 @@ import "./alpha9_1.css";
 import "./alpha9_1_components.css";
 import "./alpha9_3.css";
 import "./beta3.css";
+import "./beta4.css";
 
 export const revalidate = 300;
 
@@ -59,12 +61,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="ru">
       <body>
-        <a className="skipLink" href="#main-content">Перейти к содержимому</a>
+        <a className="skipLink" href="#main-content">Перейти к содержимому / Skip to content</a>
+        <script dangerouslySetInnerHTML={{ __html: "if(location.pathname==='/en'||location.pathname.startsWith('/en/'))document.documentElement.lang='en';" }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
         <Suspense fallback={null}><AnalyticsTracker /></Suspense>
+        <Suspense fallback={null}><LanguageSwitch /></Suspense>
         <div id="main-content" className="appContent" tabIndex={-1}>{children}</div>
       </body>
     </html>
