@@ -56,14 +56,15 @@ async function loadQa() {
 
   for (const product of products) {
     const title = `${product.model} · ${product.name}`;
+    const isController = product.category?.slug === "road-controllers";
     if (!product.description) issues.push({ key: `product-${product.id}-description`, type: "product", severity: "error", title, detail: "Нет полного описания товара.", href: `/products/${product.id}` });
-    if (!product.mediaAssets.length) issues.push({ key: `product-${product.id}-image`, type: "product", severity: "error", title, detail: "Нет изображения в медиатеке товара.", href: `/products/${product.id}` });
+    if (!product.mediaAssets.length) issues.push({ key: `product-${product.id}-image`, type: "product", severity: isController ? "error" : "warning", title, detail: isController ? "Нет изображения дорожного контроллера в медиатеке." : "Нет отдельного технического изображения. Допустим системный placeholder, но перед production желательно добавить собственное фото.", href: `/products/${product.id}` });
     if (product.mediaAssets.some((item) => item.url.includes("images.unsplash.com"))) issues.push({ key: `product-${product.id}-temporary-image`, type: "product", severity: "warning", title, detail: "Используется временное Unsplash-изображение. Перед релизом замените его собственным или подтверждённым техническим фото.", href: `/products/${product.id}` });
-    if (!product._count.specifications) issues.push({ key: `product-${product.id}-specs`, type: "product", severity: "error", title, detail: "Нет технических характеристик.", href: `/products/${product.id}` });
+    if (!product._count.specifications) issues.push({ key: `product-${product.id}-specs`, type: "product", severity: isController ? "error" : "warning", title, detail: isController ? "Нет технических характеристик контроллера." : "Для компонента нет подтверждённых технических характеристик. Не заполняйте их предположениями.", href: `/products/${product.id}` });
     if (!product._count.features) issues.push({ key: `product-${product.id}-features`, type: "product", severity: "warning", title, detail: "Нет особенностей/преимуществ для карточки товара.", href: `/products/${product.id}` });
-    if (product.category?.slug === "road-controllers" && !product._count.configurations) issues.push({ key: `product-${product.id}-configurations`, type: "product", severity: "error", title, detail: "Для дорожного контроллера не заполнены варианты комплектации.", href: `/products/${product.id}` });
-    if (product.category?.slug === "road-controllers" && !product._count.documentSeries) issues.push({ key: `product-${product.id}-documents`, type: "document", severity: "warning", title, detail: "К контроллеру не привязана ни одна серия технических документов.", href: `/documents` });
-    if (product.category?.slug === "road-controllers" && !product._count.outgoingRelations) issues.push({ key: `product-${product.id}-relations`, type: "product", severity: "warning", title, detail: "Не заполнены совместимые модули, пульты или аксессуары.", href: `/products/${product.id}` });
+    if (isController && !product._count.configurations) issues.push({ key: `product-${product.id}-configurations`, type: "product", severity: "error", title, detail: "Для дорожного контроллера не заполнены варианты комплектации.", href: `/products/${product.id}` });
+    if (isController && !product._count.documentSeries) issues.push({ key: `product-${product.id}-documents`, type: "document", severity: "warning", title, detail: "К контроллеру не привязана ни одна серия технических документов.", href: "/documents" });
+    if (isController && !product._count.outgoingRelations) issues.push({ key: `product-${product.id}-relations`, type: "product", severity: "warning", title, detail: "Не заполнены совместимые модули, пульты или аксессуары.", href: `/products/${product.id}` });
     if (!enPrimary.has(`Product:${product.slug}:name`)) issues.push({ key: `product-${product.id}-en`, type: "locale", severity: "warning", title, detail: "Нет английского названия опубликованного товара.", href: `/localization?q=${encodeURIComponent(product.slug)}` });
   }
 
